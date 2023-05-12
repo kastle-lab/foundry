@@ -1,0 +1,42 @@
+# For each row, create an Earthquake with specified URI.
+root:
+  type: "kwg-ont:Earthquake"
+  uri: "kwgr:earthquake"
+  varids: ["id"] # this will be a . joined string (i.e., 1.a.BA), where each element comes from the field indicated in the list
+  connections:
+    - p: "sosa:isFeatureOfInterestOf"
+      o: 
+        type: "kwg-ont:EarthquakeObservationCollection"
+        uri: "kwgr:earthquakeObservationCollection"
+        varids: ["id"]
+        connections:
+          - p: "sosa:hasMember"
+            o: 
+              type: "kwg-ont:EarthquakeObservation"
+              uri: "kwgr:earthquakeObservation"
+              varids: ["id"]
+              appellation: "mag"
+              connections:
+                - p: "sosa:observedProperty"
+                  o:
+                    type: "cv"
+                    uri: "kwgr:earthquakeObservableProperty.mag"
+                - p: "sosa:hasSimpleResult"
+                  o: 
+                    datatype: "rdfs:Literal"
+                    value: "mag"
+          - p: "sosa:hasMember"
+            o: 
+              type: "kwg-ont:EarthquakeObservation"
+              uri: "kwgr:earthquakeObservation"
+              varids: ["id"]
+              appellation: "depth"
+              connections:
+                - p: "sosa:observedProperty"
+                  o:
+                    type: "cv"
+                    uri: "kwgr:earthquakeObservableProperty.depth"
+                - p: "sosa:hasSimpleResult"
+                  o: 
+                    datatype: "rdfs:Literal"
+                    value: "depth"
