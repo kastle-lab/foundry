@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 ################################################################
 # directory stuff
 mapping_dir = "mapping"
-mapping_file = "test2.yaml"
+mapping_file = "earthquake-mapping.yaml"
 mapping_path = os.path.join(mapping_dir, mapping_file)
 
 # Open the mapping file
@@ -85,6 +85,8 @@ data_dir = "data"
 data_file = "earthquake_fulldata_header_20.csv"
 data_path = os.path.join(data_dir, data_file)
 output_dir = "output"
+if not os.path.exists(output_dir):
+	os.makedirs(output_dir)
 logging.info(f"Opening: {data_path}")
 
 def create_uri_from_string(s):
