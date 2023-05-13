@@ -1,6 +1,6 @@
 # For each row, create an Earthquake with specified URI.
 root:
-  type: "kwg-ont:Earthquake"
+  type: ["kwg-ont:Earthquake", "geo:Feature", "kwg-ont:Hazard"]
   uri: "kwgr:earthquake"
   varids: ["id"] # this will be a . joined string (i.e., 1.a.BA), where each element comes from the field indicated in the list
   connections:
@@ -25,7 +25,7 @@ root:
                     uri: "kwgr:earthquakeObservableProperty.mag"
                 - p: "sosa:hasSimpleResult"
                   o: 
-                    datatype: "rdfs:Literal"
+                    datatype: "xsd:double"
                     value: "mag"
           - p: "sosa:hasMember"
             o: 

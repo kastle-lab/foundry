@@ -140,10 +140,16 @@ def apply_mapping(row, mapping, graph):
 			controlled_uri = create_uri_from_string(mapping["uri"])
 			return controlled_uri
 		else:
-			# Declare the class (i.e., type) of this node
-			class_uri = create_uri_from_string(mapping["type"])
-			# Add it to the graph fragment
-			graph.add( (instance_uri, a, class_uri) )
+			types = list()
+			if isinstance(mapping["type"], str):
+				types.append(mapping["type"])
+			else:
+				types = mapping["type"]
+			for t in types:
+				# Declare the class (i.e., type) of this node
+				class_uri = create_uri_from_string(t)
+				# Add it to the graph fragment
+				graph.add( (instance_uri, a, class_uri) )
 	except KeyError:
 		raise Exception("Type field must be present")
 
@@ -154,7 +160,7 @@ def apply_mapping(row, mapping, graph):
 			pred_uri = create_uri_from_string(connection["p"])
 			graph.add( (instance_uri, pred_uri, target_uri) )
 			try:
-				inv_uri = create_uri_from_string(mapping["inv"])
+				inv_uri = create_uri_from_string(connection["inv"])
 				graph.add( (target_uri, inv_uri, instance_uri) )
 			except KeyError:
 				"""There is no inverse, which is ok."""
