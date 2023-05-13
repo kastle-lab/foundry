@@ -5,12 +5,14 @@ root:
   varids: ["id"] # this will be a . joined string (i.e., 1.a.BA), where each element comes from the field indicated in the list
   connections:
     - p: "sosa:isFeatureOfInterestOf"
+      inv: "sosa:hasFeatureOfInterest"
       o: 
         type: "kwg-ont:EarthquakeObservationCollection"
         uri: "kwgr:earthquakeObservationCollection"
         varids: ["id"]
         connections:
           - p: "sosa:hasMember"
+            inv: "sosa:isMemberOf"
             o: 
               type: "kwg-ont:EarthquakeObservation"
               uri: "kwgr:earthquakeObservation"

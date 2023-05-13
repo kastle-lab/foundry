@@ -153,8 +153,13 @@ def apply_mapping(row, mapping, graph):
 			target_uri = apply_mapping(row, connection["o"], graph)
 			pred_uri = create_uri_from_string(connection["p"])
 			graph.add( (instance_uri, pred_uri, target_uri) )
+			try:
+				inv_uri = create_uri_from_string(mapping["inv"])
+				graph.add( (target_uri, inv_uri, instance_uri) )
+			except KeyError:
+				"""There is no inverse, which is ok."""
 	except KeyError:
-		"""There are no downstream connections."""
+		"""There are no downstream connections, which is ok."""
 	return instance_uri
 with open(data_path, "r") as data_stream:
 	logging.info("Open success.")
