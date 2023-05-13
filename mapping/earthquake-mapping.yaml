@@ -1,3 +1,5 @@
+constants:
+  test: "test"
 # For each row, create an Earthquake with specified URI.
 root:
   type: ["kwg-ont:Earthquake", "geo:Feature", "kwg-ont:Hazard"]
@@ -20,13 +22,11 @@ root:
               appellation: "mag"
               connections:
                 - p: "sosa:observedProperty"
-                  o:
-                    type: "cv"
-                    uri: "kwgr:earthquakeObservableProperty.mag"
+                  o: "kwgr:earthquakeObservableProperty.mag"
                 - p: "sosa:hasSimpleResult"
                   o: 
                     datatype: "xsd:double"
-                    value: "mag"
+                    val_source: "mag"
           - p: "sosa:hasMember"
             o: 
               type: "kwg-ont:EarthquakeObservation"
@@ -35,10 +35,18 @@ root:
               appellation: "depth"
               connections:
                 - p: "sosa:observedProperty"
-                  o:
-                    type: "cv"
-                    uri: "kwgr:earthquakeObservableProperty.depth"
+                  o: "kwgr:earthquakeObservableProperty.depth"
                 - p: "sosa:hasSimpleResult"
                   o: 
                     datatype: "rdfs:Literal"
-                    value: "depth"
+                    val_source: "depth"
+    - p: "kwg-ont:hasTemporalScope"
+      o: 
+        type: "time:Instant"
+        uri: "kwgr:instant"
+        varids: ["id"]
+        connections:
+          - p: "time:inXSDDateTime"
+            o:
+              datatype: "xsd:dateTime"
+              val_source: "time"

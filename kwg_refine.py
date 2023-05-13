@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 ################################################################
 ##### MAPPING INIT #####
 ################################################################
-# directory stuff
+# Directory stuff
 mapping_dir = "mapping"
 mapping_file = "earthquake-mapping.yaml"
 mapping_path = os.path.join(mapping_dir, mapping_file)
@@ -29,8 +29,7 @@ with open(mapping_path, "r") as mapping_stream:
 # Catch any loading problems that the parser didn't catch
 if mapping is None:
 	raise Exception("Mapping not properly loaded.")
-
-# Get the root
+# Get the root mapping (i.e., what will be recursively applied to the data)
 root = None
 try:
 	root = mapping["root"]
@@ -103,10 +102,17 @@ def create_uri_from_string(s):
 	return pfs[prefix][classname]
 
 def apply_mapping(row, mapping, graph):
+	if isinstance(mapping, str):
+		return create_uri_from_string(mapping)
+
 	try:
 		### Check if this is a datatype value
 		datatype = create_uri_from_string(mapping["datatype"])
-		literal_value = Literal(row[mapping["value"]],datatype=datatype)
+		try:
+			val = row[mapping["val_source"]]
+		except KeyError:
+			val = mapping["value"]
+		literal_value = Literal(val,datatype=datatype)	
 		return literal_value
 	except KeyError:
 		"""Just means it's not a datatype"""
@@ -134,22 +140,17 @@ def apply_mapping(row, mapping, graph):
 	instance_uri = URIRef(instance_uri_string)
 	### Check that there is a type
 	try:
-		# CV -- controlled vocabulary
-		# Generally means the uri in the yaml has been minted elsewhere
-		if mapping["type"] == "cv":
-			controlled_uri = create_uri_from_string(mapping["uri"])
-			return controlled_uri
+		# Detect if there are multiple types
+		types = list()
+		if isinstance(mapping["type"], str):
+			types.append(mapping["type"])
 		else:
-			types = list()
-			if isinstance(mapping["type"], str):
-				types.append(mapping["type"])
-			else:
-				types = mapping["type"]
-			for t in types:
-				# Declare the class (i.e., type) of this node
-				class_uri = create_uri_from_string(t)
-				# Add it to the graph fragment
-				graph.add( (instance_uri, a, class_uri) )
+			types = mapping["type"]
+		for t in types:
+			# Declare the class (i.e., type) of this node
+			class_uri = create_uri_from_string(t)
+			# Add it to the graph fragment
+			graph.add( (instance_uri, a, class_uri) )
 	except KeyError:
 		raise Exception("Type field must be present")
 
@@ -167,15 +168,19 @@ def apply_mapping(row, mapping, graph):
 	except KeyError:
 		"""There are no downstream connections, which is ok."""
 	return instance_uri
+
+# Get the data
 with open(data_path, "r") as data_stream:
 	logging.info("Open success.")
 	reader = csv.DictReader(data_stream)
 	logging.info("Load success.")
-
+	### Apply the mapping for each row in the csv
 	for row in reader:
+		# Create an empty graph
 		graph = init_kg()
+		# Apply the mapping (pass by reference)
 		apply_mapping(row, root, graph)
-		# serialize the fragment
+		# Serialize and output the fragment
 		logging.info("Serializing the fragment.")
 		output_file = f"output-{row['id']}.ttl"
 		output_path = os.path.join(output_dir, output_file)
