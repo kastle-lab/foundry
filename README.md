@@ -27,9 +27,8 @@ root: # (required)
      - p: "predicate"             # (required) the predicate to connect to the next node
        o:                         # (required) the attributes below are for a datatype node
          datatype: "datatype"     # (optional) the uri for the datatype, if this attribute is present (checked first) an rdf:type will NOT be assigned.
-         value: "value"           # the value of this literal
+         val_source: "val_source" # (exclusive 'or' with value, required) the source column for this literal
+         value: "value"           # (exclusive 'or' with val_source, required) the datum value for this literal
      - p: "predicate"
-       o: 
-         type: "cv"               # this is the only special value for type, it means "directly use the URI provided"
-         uri: "uri"               # (required) a URi to use directly (i.e., the script will not even look for varids or appellation)
+       o: "uri"               # (exlusive 'or' with root attributes) a URi to use directly (i.e., the script will not even look for varids or appellation)
 ```
