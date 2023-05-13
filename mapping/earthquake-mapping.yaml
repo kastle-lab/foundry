@@ -13,6 +13,11 @@ root:
         uri: "kwgr:earthquakeObservationCollection"
         varids: ["id"]
         connections:
+          - p: "sosa:phenomenonTime"
+            o:
+              uri: "kwgr:instant"
+              varids: ["id"]
+              ref: true
           - p: "sosa:hasMember"
             inv: "sosa:isMemberOf"
             o: 

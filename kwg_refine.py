@@ -9,7 +9,7 @@ except ImportError:
     from yaml import Loader, Dumper
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)    
+logging.basicConfig(level=logging.WARNING)    
 
 ################################################################
 ##### MAPPING INIT #####
@@ -102,11 +102,12 @@ def create_uri_from_string(s):
 	return pfs[prefix][classname]
 
 def apply_mapping(row, mapping, graph):
+	### Check if it's just linking to a specific URI
 	if isinstance(mapping, str):
 		return create_uri_from_string(mapping)
 
+	### Check if this is a datatype value
 	try:
-		### Check if this is a datatype value
 		datatype = create_uri_from_string(mapping["datatype"])
 		try:
 			val = row[mapping["val_source"]]
@@ -138,7 +139,8 @@ def apply_mapping(row, mapping, graph):
 	except KeyError:
 		pass
 	instance_uri = URIRef(instance_uri_string)
-	### Check that there is a type
+
+	### Add types, if desired
 	try:
 		# Detect if there are multiple types
 		types = list()
@@ -152,7 +154,13 @@ def apply_mapping(row, mapping, graph):
 			# Add it to the graph fragment
 			graph.add( (instance_uri, a, class_uri) )
 	except KeyError:
-		raise Exception("Type field must be present")
+		try:
+			ref = mapping["ref"]
+		except KeyError:
+			ref = False
+		if not ref:
+			logging.warning(f"Added instance without type: {instance_uri}")
+		pass
 
 	# Connect this node to next layer
 	try:
