@@ -188,6 +188,24 @@ with open(data_path, "r") as data_stream:
 	logging.info("Open success.")
 	reader = csv.DictReader(data_stream)
 	logging.info("Load success.")
+
+	### Generate any constants (e.g., controlled vocabularies)
+	for i, cv in enumerate(mapping["cvs"]):
+		# Create an empty graph
+		graph = init_kg()
+		# Apply the mapping (pass by reference)
+		class_uri = create_uri_from_string(cv["type"])
+		for instance in cv["instances"]:
+			instance_uri_string = f"{cv['uri']}.{instance}"
+			instance_uri = create_uri_from_string(instance_uri_string)
+			graph.add( (instance_uri, a, class_uri) )
+		# Serialize and output the fragment
+		logging.info("Serializing the fragment.")
+		output_file = f"output-cv-{i}.ttl"
+		output_path = os.path.join(output_dir, output_file)
+		graph.serialize(format="turtle", encoding="utf-8", destination=output_path)
+		logging.info("Serialized.")
+
 	### Apply the mapping for each row in the csv
 	for row in reader:
 		# Create an empty graph

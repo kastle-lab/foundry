@@ -1,5 +1,11 @@
-constants:
-  test: "test"
+name: "Earthquake Mapping"
+
+cvs:
+  - cv: 
+    type: "kwg-ont:EarthquakeObservableProperty" 
+    uri: "kwgr:earthquakeObservableProperty"
+    instances: ["depth", "mag", "magType", "nst", "gap", "dmin", "rms", "net", "type", "horizontalError", "depthError", "magError", "magNst", "status","locationSource", "magSource"]
+
 # For each row, create an Earthquake with specified URI.
 root:
   type: ["kwg-ont:Earthquake", "geo:Feature", "kwg-ont:Hazard"]
@@ -57,3 +63,7 @@ root:
               val_source: "time"
     - p: ["geo:hasGeometry", "geo:hasDefaultGeometry"]
       o: "ex:test"
+    - p: "rdfs:label"
+      o: 
+        datatype: "xsd:string"
+        value: "EARTHQUAKE!"
