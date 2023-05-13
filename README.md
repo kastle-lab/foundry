@@ -36,4 +36,6 @@ root: # (required)
         uri: "uri"
         varids: ["varid"]
         ref: true                # Will suppress untyped warning
+    - p: ["predicate", "predicate"] # It's possible to point to the same object with multiple predicates (rare usecase, but essentially shortcuts the use of a po: with ref construction)
+      o: "uri"
 ```

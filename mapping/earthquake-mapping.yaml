@@ -55,3 +55,5 @@ root:
             o:
               datatype: "xsd:dateTime"
               val_source: "time"
+    - p: ["geo:hasGeometry", "geo:hasDefaultGeometry"]
+      o: "ex:test"

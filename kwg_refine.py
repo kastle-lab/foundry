@@ -165,9 +165,15 @@ def apply_mapping(row, mapping, graph):
 	# Connect this node to next layer
 	try:
 		for connection in mapping["connections"]:
+			# Get URI for target (i.e., the object)
 			target_uri = apply_mapping(row, connection["o"], graph)
-			pred_uri = create_uri_from_string(connection["p"])
-			graph.add( (instance_uri, pred_uri, target_uri) )
+			# Get URI(s) for predicates
+			preds = connection["p"]
+			if not isinstance(preds, list):
+				preds = [preds]
+			for pred in preds:
+				pred_uri = create_uri_from_string(pred)
+				graph.add( (instance_uri, pred_uri, target_uri) )
 			try:
 				inv_uri = create_uri_from_string(connection["inv"])
 				graph.add( (target_uri, inv_uri, instance_uri) )
