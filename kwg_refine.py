@@ -102,21 +102,30 @@ def create_uri_from_string(s):
 	return pfs[prefix][classname]
 
 def apply_mapping(row, mapping, graph):
-	### Check if it's just linking to a specific URI
+	### Check if it's ONLY linking to a specific URI
 	if isinstance(mapping, str):
 		return create_uri_from_string(mapping)
 
 	### Check if this is a datatype value
 	try:
+		# Get the datatype
 		datatype = create_uri_from_string(mapping["datatype"])
+		# Get the value for the literal
+		# There are two ways to do this, with val_source checked first
+		# The spec says that val_source and value are exlusive
 		try:
+			# Retrieve the data from a row in the data source
 			val = row[mapping["val_source"]]
 		except KeyError:
+			# The data is hardcoded as part of the mapping
 			val = mapping["value"]
-		literal_value = Literal(val,datatype=datatype)	
+		# Encode the data
+		literal_value = Literal(val,datatype=datatype)
+		# Return it to be linked
+		# There should never be a connection from a datatype node	
 		return literal_value
 	except KeyError:
-		"""Just means it's not a datatype"""
+		"""Just means it's not a datatype, so we keep going"""
 
 	### Create the node for the current layer
 	# Mint a URI for the node
@@ -160,7 +169,6 @@ def apply_mapping(row, mapping, graph):
 			ref = False
 		if not ref:
 			logging.warning(f"Added instance without type: {instance_uri}")
-		pass
 
 	# Connect this node to next layer
 	try:
