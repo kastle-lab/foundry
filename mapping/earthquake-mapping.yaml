@@ -1,4 +1,6 @@
-name: "Earthquake Mapping"
+metadata:
+  name: "Earthquake Mapping"
+  source_ext: "csv"
 
 cvs:
   - cv: 
