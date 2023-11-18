@@ -118,7 +118,12 @@ def apply_mapping(row, mapping, graph):
 			val = row[mapping["val_source"]]
 		except KeyError:
 			# The data is hardcoded as part of the mapping
-			val = mapping["value"]
+			try:
+				val = mapping["value"]
+			except KeyError: 
+				msg = "'value' or 'val_source' must be defined for a datatype node."
+				logging.error(msg)
+				raise Exception(msg)
 		# Encode the data
 		literal_value = Literal(val,datatype=datatype)
 		# Return it to be linked
@@ -126,6 +131,7 @@ def apply_mapping(row, mapping, graph):
 		return literal_value
 	except KeyError:
 		"""Just means it's not a datatype, so we keep going"""
+		pass
 
 	### Create the node for the current layer
 	# Mint a URI for the node
@@ -144,9 +150,10 @@ def apply_mapping(row, mapping, graph):
 		try:
 			instance_uri_string += "." + mapping["appellation"]
 		except KeyError:
-			pass
+			pass # Appellation is optional
 	except KeyError:
-		pass
+		pass # Varids are optional, if unusual to be so
+	# Create the URI from the constructed string
 	instance_uri = URIRef(instance_uri_string)
 
 	### Add types, if desired
@@ -166,6 +173,7 @@ def apply_mapping(row, mapping, graph):
 		try:
 			ref = mapping["ref"]
 		except KeyError:
+			# If 'ref' is not explicitly defined, then it is false.
 			ref = False
 		if not ref:
 			logging.warning(f"Added instance without type: {instance_uri}")
@@ -191,28 +199,34 @@ def apply_mapping(row, mapping, graph):
 		"""There are no downstream connections, which is ok."""
 	return instance_uri
 
-# Get the data
+# Get the data out of the CSV
 with open(data_path, "r") as data_stream:
-	logging.info("Open success.")
+	### Load the csv
+	logging.info("CSV Open success.")
 	reader = csv.DictReader(data_stream)
-	logging.info("Load success.")
+	if reader == None:
+		logging.info("CSV Load failure.")
+	logging.info("CSV Load success.")
 
 	### Generate any constants (e.g., controlled vocabularies)
-	for i, cv in enumerate(mapping["cvs"]):
-		# Create an empty graph
-		graph = init_kg()
-		# Apply the mapping (pass by reference)
-		class_uri = create_uri_from_string(cv["type"])
-		for instance in cv["instances"]:
-			instance_uri_string = f"{cv['uri']}.{instance}"
-			instance_uri = create_uri_from_string(instance_uri_string)
-			graph.add( (instance_uri, a, class_uri) )
-		# Serialize and output the fragment
-		logging.info("Serializing the fragment.")
-		output_file = f"output-cv-{i}.ttl"
-		output_path = os.path.join(output_dir, output_file)
-		graph.serialize(format="turtle", encoding="utf-8", destination=output_path)
-		logging.info("Serialized.")
+	try:
+		for i, cv in enumerate(mapping["cvs"]):
+			# Create an empty graph
+			graph = init_kg()
+			# Apply the mapping (pass by reference)
+			class_uri = create_uri_from_string(cv["type"])
+			for instance in cv["instances"]:
+				instance_uri_string = f"{cv['uri']}.{instance}"
+				instance_uri = create_uri_from_string(instance_uri_string)
+				graph.add( (instance_uri, a, class_uri) )
+			# Serialize and output the fragment
+			logging.info("Serializing the fragment.")
+			output_file = f"output-cv-{i}.ttl"
+			output_path = os.path.join(output_dir, output_file)
+			graph.serialize(format="turtle", encoding="utf-8", destination=output_path)
+			logging.info("Serialized.")
+	except KeyError as e:
+		logging.info("No CVs detected.")
 
 	### Apply the mapping for each row in the csv
 	for row in reader:
