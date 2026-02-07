@@ -44,15 +44,6 @@ except KeyError:
     logging.error(msg)
     raise Exception(msg)
 
-# Initialization shortcut
-
-
-def init_kg(prefixes=pfs):
-    kg = Graph()
-    for prefix in pfs:
-        kg.bind(prefix, pfs[prefix])
-    return kg
-
 
 ################################################################
 ##### DO MAPPING #####
@@ -94,6 +85,12 @@ pfs = {
 # rdf:type shortcut
 a = pfs["rdf"]["type"]
 
+# Initialization shortcut
+def init_kg(prefixes=pfs):
+    kg = Graph()
+    for prefix in prefixes:
+        kg.bind(prefix, prefixes[prefix])
+    return kg
 
 def create_uri_from_string(s):
     tokens = s.split(":")
