@@ -137,6 +137,7 @@ def apply_mapping(row, mapping, graph):
             return literal_value
     except KeyError:
         """Just means it's not a datatype, so we keep going"""
+        logging.info("Not a datatype node, keep going.")
         pass
 
     # Create the node for the current layer
@@ -156,8 +157,10 @@ def apply_mapping(row, mapping, graph):
         try:
             instance_uri_string += "." + mapping["appellation"]
         except KeyError:
+            logging.info("Appellation not defined, skipping.")
             pass  # Appellation is optional
     except KeyError:
+        logging.info("Varids not defined, skipping.")
         pass  # Varids are optional, if unusual to be so
     # Create the URI from the constructed string
     instance_uri = URIRef(instance_uri_string)
