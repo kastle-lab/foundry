@@ -253,4 +253,4 @@ with open(data_path, "r") as data_stream:
         j += 1
 
 # Usage: python kastle-foundry.py <mapping_file> <data_file> <output_dir> [<namespace>] [<prefix_for_namespace>]
-# example: python kastle-foundry.py mapping.yaml data.csv output/ http://example.com/ ex
+# example: python kastle-foundry.py mapping/earthquake-mapping.yaml earthquake_fulldata.csv output/ http://stko-kwg.geog.ucsb.edu/ kwg
