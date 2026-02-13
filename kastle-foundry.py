@@ -1,3 +1,4 @@
+import xml.etree.ElementTree as ET
 from rdflib import OWL, RDF, RDFS, XSD, TIME
 from rdflib import URIRef, Graph, Namespace, Literal
 import rdflib
@@ -79,7 +80,8 @@ pfs = {
     "ssn": Namespace("http://www.w3.org/ns/ssn/"),
     "sosa": Namespace("http://www.w3.org/ns/sosa/"),
     "cdt": Namespace("http://w3id.org/lindt/custom_datatypes#"),
-    "ex": Namespace("https://example.com/")
+    "ex": Namespace("https://example.com/"),
+    "dcterms": Namespace("http://purl.org/dc/terms/"),
 }
 
 # rdf:type shortcut
@@ -95,13 +97,16 @@ def init_kg(prefixes=pfs):
 def create_uri_from_string(s):
     tokens = s.split(":")
     if len(tokens) == 1:  # use default namespace
-        prefix = pfs["ex"]
+        prefix = pfs[f"{pf_to_use}-r"]
     elif len(tokens) == 2:
         prefix, classname = tokens
     else:
         msg = f"Malformed type found: {mapping['type']}"
         logging.error(msg)
         raise Exception(msg)
+    if prefix not in pfs:
+        logging.error(f"Unknown prefix '{prefix}' in '{s}'")
+        raise Exception(f"Unknown prefix '{prefix}' in '{s}'")
 
     return pfs[prefix][classname]
 
@@ -209,15 +214,106 @@ def apply_mapping(row, mapping, graph):
     return instance_uri
 
 
+def iter_val_sources(mapping_node):
+    """Yield every val_source used anywhere in the mapping."""
+    if isinstance(mapping_node, dict):
+        if "val_source" in mapping_node:
+            yield mapping_node["val_source"]
+        # datatype nodes also live under "o"
+        for k, v in mapping_node.items():
+            if isinstance(v, (dict, list)):
+                yield from iter_val_sources(v)
+    elif isinstance(mapping_node, list):
+        for item in mapping_node:
+            yield from iter_val_sources(item)
+
+
+def xml_get_texts(xml_root, path):
+    """
+    Return list of text values for a simple slash-separated tag path.
+    Joins repeated leaf tags (e.g., multiple <Author> tags).
+    """
+    parts = [p for p in path.split("/") if p]
+    elems = [xml_root]
+    for part in parts:
+        next_elems = []
+        for e in elems:
+            next_elems.extend(list(e.findall(part)))
+        elems = next_elems
+        if not elems:
+            return []
+    out = []
+    for e in elems:
+        if e.text is not None:
+            t = e.text.strip()
+            if t != "":
+                out.append(t)
+    return out
+
+
+def build_row_from_xml(xml_path, mapping):
+    """
+    Build a dict like csv.DictReader would, with keys for:
+    - ID/Control_ID/etc. (top-level)
+    - every val_source found in the mapping
+    Missing paths are included as empty strings to avoid KeyError in apply_mapping().
+    """
+    tree = ET.parse(xml_path)
+    xr = tree.getroot()
+
+    # ensure all varids exist in row
+    def collect_varids(mapping_node):
+        ids = set()
+        if isinstance(mapping_node, dict):
+            if "varids" in mapping_node:
+                ids.update(mapping_node["varids"])
+            for v in mapping_node.values():
+                if isinstance(v, (dict, list)):
+                    ids.update(collect_varids(v))
+        elif isinstance(mapping_node, list):
+            for item in mapping_node:
+                ids.update(collect_varids(item))
+        return ids
+    
+    row = {}
+    for vid in collect_varids(mapping):
+        el = xr.find(vid)
+        row[vid] = (el.text.strip() if (el is not None and el.text) else "")
+
+    vs_values = {}
+    for vs in sorted(set(iter_val_sources(mapping))):
+        vals = xml_get_texts(xr, vs)
+        # normalize + dedupe, preserving order
+        vals = [v.strip() for v in vals if v and v.strip()]
+        seen = set()
+        vals = [v for v in vals if not (v in seen or seen.add(v))]
+
+        vs_values[vs] = vals
+        row[vs] = vals[0] if vals else ""
+
+    rows = [row]
+
+    def row_sig(d):
+        return tuple(sorted(d.items()))
+
+    seen_rows = {row_sig(row)}
+
+    for vs, vals in vs_values.items():
+        if len(vals) > 1:
+            for extra_val in vals[1:]:
+                r = dict(row)
+                r[vs] = extra_val
+                sig = row_sig(r)
+                if sig not in seen_rows:
+                    rows.append(r)
+                    seen_rows.add(sig)
+
+    return rows
+
 j = 0
-# Get the data out of the CSV
-with open(data_path, "r") as data_stream:
-    # Load the csv
-    logging.info("CSV Open success.")
-    reader = csv.DictReader(data_stream)
-    if reader == None:
-        logging.info("CSV Load failure.")
-    logging.info("CSV Load success.")
+rows = None
+if data_path.lower().endswith(".xml"):
+    rows = build_row_from_xml(data_path, mapping)
 
     # Generate any constants (e.g., controlled vocabularies)
     try:
@@ -232,7 +328,8 @@ with open(data_path, "r") as data_stream:
                 graph.add((instance_uri, a, class_uri))
             # Serialize and output the fragment
             logging.info("Serializing the fragment.")
-            output_file = f"output-cv-{data_path.split("/")[-1].split(".")[0]}-{i}.ttl"
+            base = os.path.splitext(os.path.basename(data_path))[0]
+            output_file = f"output-cv-{base}-{i}.ttl"
             output_path = os.path.join(output_dir, output_file)
             graph.serialize(format="turtle", encoding="utf-8",
                             destination=output_path)
@@ -240,20 +337,67 @@ with open(data_path, "r") as data_stream:
     except KeyError as e:
         logging.info("No CVs detected.")
 
-    # Apply the mapping for each row in the csv
-    for row in reader:
+    for row in rows:
         # Create an empty graph
         graph = init_kg()
         # Apply the mapping (pass by reference)
         apply_mapping(row, root, graph)
         # Serialize and output the fragment
         logging.info("Serializing the fragment.")
-        output_file = f"output-{data_path.split("/")[-1].split(".")[0]}-{j}.ttl"
+        base = os.path.splitext(os.path.basename(data_path))[0]
+        output_file = f"output-{base}-{j}.ttl"
         output_path = os.path.join(output_dir, output_file)
         graph.serialize(format="turtle", encoding="utf-8",
                         destination=output_path)
         logging.info("Serialized.")
         j += 1
+else:
+    # Get the data out of the CSV
+    with open(data_path, "r") as data_stream:
+        # Load the csv
+        logging.info("CSV Open success.")
+        reader = csv.DictReader(data_stream)
+        if reader == None:
+            logging.info("CSV Load failure.")
+        logging.info("CSV Load success.")
+
+        # Generate any constants (e.g., controlled vocabularies)
+        try:
+            for i, cv in enumerate(mapping["cvs"]):
+                # Create an empty graph
+                graph = init_kg()
+                # Apply the mapping (pass by reference)
+                class_uri = create_uri_from_string(cv["type"])
+                for instance in cv["instances"]:
+                    instance_uri_string = f"{cv['uri']}.{instance}"
+                    instance_uri = create_uri_from_string(instance_uri_string)
+                    graph.add((instance_uri, a, class_uri))
+                # Serialize and output the fragment
+                logging.info("Serializing the fragment.")
+                base = os.path.splitext(os.path.basename(data_path))[0]
+                output_file = f"output-cv-{base}-{i}.ttl"
+                output_path = os.path.join(output_dir, output_file)
+                graph.serialize(format="turtle", encoding="utf-8",
+                                destination=output_path)
+                logging.info("Serialized.")
+        except KeyError as e:
+            logging.info("No CVs detected.")
+
+        # Apply the mapping for each row in the csv
+        for row in reader:
+            # Create an empty graph
+            graph = init_kg()
+            # Apply the mapping (pass by reference)
+            apply_mapping(row, root, graph)
+            # Serialize and output the fragment
+            logging.info("Serializing the fragment.")
+            base = os.path.splitext(os.path.basename(data_path))[0]
+            output_file = f"output-{base}-{j}.ttl"
+            output_path = os.path.join(output_dir, output_file)
+            graph.serialize(format="turtle", encoding="utf-8",
+                            destination=output_path)
+            logging.info("Serialized.")
+            j += 1
 
 # Usage: python kastle-foundry.py <mapping_file> <data_file> <output_dir> [<namespace>] [<prefix_for_namespace>]
 # example: python kastle-foundry.py mapping/earthquake-mapping.yaml earthquake_fulldata.csv output/ http://stko-kwg.geog.ucsb.edu/ kwg
