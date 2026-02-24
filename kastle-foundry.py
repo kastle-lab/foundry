@@ -55,15 +55,6 @@ parser.add_argument(
 
 cli_args = parser.parse_args()
 
-# Build a positional-style list so the rest of the code can stay the same
-args = [
-    cli_args.mapping,
-    cli_args.data,
-    cli_args.output_dir,
-    cli_args.namespace,
-    cli_args.prefix,
-]
-
 # 
 # Set up and configure logging
 log_level = logging.DEBUG if cli_args.verbose else logging.WARNING
