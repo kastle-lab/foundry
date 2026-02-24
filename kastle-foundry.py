@@ -6,6 +6,7 @@ import sys
 import os
 import logging
 import csv
+import argparse
 
 from yaml import load, dump
 try:
@@ -14,17 +15,75 @@ except ImportError:
     from yaml import Loader, Dumper
 from urllib.parse import quote
 
+parser = argparse.ArgumentParser(
+    description="Generate RDF knowledge graphs from a mapping and CSV/XML data."
+)
+parser.add_argument(
+    "-m", "--mapping",
+    required=True,
+    help="Path to the YAML mapping file"
+)
+parser.add_argument(
+    "-d", "--data",
+    required=True,
+    help="Path to the input data file (CSV or XML)"
+)
+parser.add_argument(
+    "-o", "--output-dir",
+    default="output",
+    help="Directory to write output Turtle files"
+)
+parser.add_argument(
+    "--namespace", "--n",
+    required=True,
+    help="Base namespace URI"
+)
+parser.add_argument(
+    "--prefix",
+    default="ex",
+    help="Prefix to use for the base namespace (default: ex)"
+)
+parser.add_argument(
+    "-v", "--verbose",
+    action="store_true",
+    help="Enable verbose logging (DEBUG level)"
+)
+parser.add_argument(
+    "--log-file",
+    help="Log file name (if omitted, logs go to stderr)"
+)
 
-# Set up logging
-logging.basicConfig(level=logging.WARNING)
+cli_args = parser.parse_args()
 
-args = sys.argv[1:]
+# Build a positional-style list so the rest of the code can stay the same
+args = [
+    cli_args.mapping,
+    cli_args.data,
+    cli_args.output_dir,
+    cli_args.namespace,
+    cli_args.prefix,
+]
+
+# 
+# Set up and configure logging
+log_level = logging.DEBUG if cli_args.verbose else logging.WARNING
+
+logging_kwargs = {
+    "level": log_level,
+    "format": "%(asctime)s - %(levelname)s - %(message)s",
+}
+
+if cli_args.log_file:
+    logging_kwargs["filename"] = cli_args.log_file
+    logging_kwargs["filemode"] = "w"  # overwrite each run
+
+logging.basicConfig(**logging_kwargs)
 
 ################################################################
 ##### MAPPING INIT #####
 ################################################################
 # Directory stuff
-mapping_path = args[0]
+mapping_path = cli_args.mapping
 
 # Open the mapping file
 logging.info(f"Opening: {mapping_path}")
@@ -50,8 +109,8 @@ except KeyError:
 ##### DO MAPPING #####
 ################################################################
 # open the data file
-data_path = args[1]
-output_dir = args[2]
+data_path = cli_args.data
+output_dir = cli_args.output_dir
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 logging.info(f"Opening: {data_path}")
@@ -61,8 +120,8 @@ logging.info(f"Opening: {data_path}")
 ################################################################
 # Graph stuff
 # Prefixes
-name_space = "http://cs7820.com/" if not args[3] else args[3]
-pf_to_use = "pf" if not args[4] else args[4]
+name_space = cli_args.namespace
+pf_to_use = cli_args.prefix
 pfs = {
     f"{pf_to_use}-r": Namespace(f"{name_space}lod/resource/"),
     f"{pf_to_use}-ont": Namespace(f"{name_space}lod/ontology/"),
@@ -143,7 +202,6 @@ def apply_mapping(row, mapping, graph):
     except KeyError:
         """Just means it's not a datatype, so we keep going"""
         logging.info("Not a datatype node, keep going.")
-        pass
 
     # Create the node for the current layer
     # Mint a URI for the node
@@ -162,11 +220,9 @@ def apply_mapping(row, mapping, graph):
         try:
             instance_uri_string += "." + mapping["appellation"]
         except KeyError:
-            logging.info("Appellation not defined, skipping.")
-            pass  # Appellation is optional
+            logging.info("Appellation not defined, skipping.") # Appellation is optional
     except KeyError:
-        logging.info("Varids not defined, skipping.")
-        pass  # Varids are optional, if unusual to be so
+        logging.info("Varids not defined, skipping.") # Varids are optional, if unusual to be so
     # Create the URI from the constructed string
     instance_uri = URIRef(instance_uri_string)
 
@@ -399,5 +455,32 @@ else:
             logging.info("Serialized.")
             j += 1
 
-# Usage: python kastle-foundry.py <mapping_file> <data_file> <output_dir> [<namespace>] [<prefix_for_namespace>]
-# example: python kastle-foundry.py mapping/earthquake-mapping.yaml earthquake_fulldata.csv output/ http://stko-kwg.geog.ucsb.edu/ kwg
+# Usage:
+#   python kastle-foundry.py \
+#       -m <mapping_file> \
+#       -d <data_file> \
+#       -o <output_dir> \
+#       --namespace <namespace> \
+#       [--prefix <prefix_for_namespace>] \
+#       [-v] \
+#       [--log-file <log_filename>]
+#
+# Examples:
+#  Examples 1:
+#    python kastle-foundry.py \
+#        -m example_inputs/earthquake-mapping.yaml \
+#        -d example_inputs/earthquake_example_data.csv \
+#        -o output/ \
+#        --namespace http://stko-kwg.geog.ucsb.edu/ \
+#        --prefix kwg \
+#        -v \
+#        --log-file kastle-foundry.log
+#  Examples 2:
+#    python kastle-foundry.py \
+#        -m example_inputs/earthquake-mapping.yaml \
+#        -d example_inputs/earthquake_example_data.csv \
+#        -o output/ \
+#        --namespace http://stko-kwg.geog.ucsb.edu/ \
+#        --prefix kwg \
+#        -v
+#        --log-file run.log
