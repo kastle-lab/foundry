@@ -5,37 +5,37 @@ metadata:
 cvs:
   - cv: 
     type: "kwg-ont:EarthquakeObservableProperty" 
-    uri: "kwgr:earthquakeObservableProperty"
+    uri: "kwg-r:earthquakeObservableProperty"
     instances: ["depth", "mag", "magType", "nst", "gap", "dmin", "rms", "net", "type", "horizontalError", "depthError", "magError", "magNst", "status","locationSource", "magSource"]
 
 # For each row, create an Earthquake with specified URI.
 root:
   type: ["kwg-ont:Earthquake", "geo:Feature", "kwg-ont:Hazard"]
-  uri: "kwgr:earthquake"
+  uri: "kwg-r:earthquake"
   varids: ["id"] # this will be a . joined string (i.e., 1.a.BA), where each element comes from the field indicated in the list
   connections:
     - p: "sosa:isFeatureOfInterestOf"
       inv: "sosa:hasFeatureOfInterest"
       o: 
         type: "kwg-ont:EarthquakeObservationCollection"
-        uri: "kwgr:earthquakeObservationCollection"
+        uri: "kwg-r:earthquakeObservationCollection"
         varids: ["id"]
         connections:
           - p: "sosa:phenomenonTime"
             o:
-              uri: "kwgr:instant"
+              uri: "kwg-r:instant"
               varids: ["id"]
               ref: true
           - p: "sosa:hasMember"
             inv: "sosa:isMemberOf"
             o: 
               type: "kwg-ont:EarthquakeObservation"
-              uri: "kwgr:earthquakeObservation"
+              uri: "kwg-r:earthquakeObservation"
               varids: ["id"]
               appellation: "mag"
               connections:
                 - p: "sosa:observedProperty"
-                  o: "kwgr:earthquakeObservableProperty.mag"
+                  o: "kwg-r:earthquakeObservableProperty.mag"
                 - p: "sosa:hasSimpleResult"
                   o: 
                     datatype: "xsd:double"
@@ -43,12 +43,12 @@ root:
           - p: "sosa:hasMember"
             o: 
               type: "kwg-ont:EarthquakeObservation"
-              uri: "kwgr:earthquakeObservation"
+              uri: "kwg-r:earthquakeObservation"
               varids: ["id"]
               appellation: "depth"
               connections:
                 - p: "sosa:observedProperty"
-                  o: "kwgr:earthquakeObservableProperty.depth"
+                  o: "kwg-r:earthquakeObservableProperty.depth"
                 - p: "sosa:hasSimpleResult"
                   o: 
                     datatype: "rdfs:Literal"
@@ -56,7 +56,7 @@ root:
     - p: "kwg-ont:hasTemporalScope"
       o: 
         type: "time:Instant"
-        uri: "kwgr:instant"
+        uri: "kwg-r:instant"
         varids: ["id"]
         connections:
           - p: "time:inXSDDateTime"
