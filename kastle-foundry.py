@@ -466,7 +466,7 @@ else:
 #       [--log-file <log_filename>]
 #
 # Examples:
-#  Examples 1:
+#  Example 1:
 #    python kastle-foundry.py \
 #        -m example_inputs/earthquake-mapping.yaml \
 #        -d example_inputs/earthquake_example_data.csv \
@@ -475,12 +475,10 @@ else:
 #        --prefix kwg \
 #        -v \
 #        --log-file kastle-foundry.log
-#  Examples 2:
+#  Example 2:
 #    python kastle-foundry.py \
 #        -m example_inputs/earthquake-mapping.yaml \
 #        -d example_inputs/earthquake_example_data.csv \
 #        -o output/ \
 #        --namespace http://stko-kwg.geog.ucsb.edu/ \
-#        --prefix kwg \
-#        -v
-#        --log-file run.log
+#        --prefix kwg
