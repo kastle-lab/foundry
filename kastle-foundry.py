@@ -496,7 +496,7 @@ for data_path in data_paths:
 # Usage:
 #   python kastle-foundry.py \
 #       -m <mapping_file> \
-#       -d <data_file> \
+#       -d <data_file/data_dir> \
 #       -o <output_dir> \
 #       --namespace <namespace> \
 #       [--prefix <prefix_for_namespace>] \
