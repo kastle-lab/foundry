@@ -26,7 +26,7 @@ parser.add_argument(
 parser.add_argument(
     "-d", "--data",
     required=True,
-    help="Path to the input data file (CSV or XML)"
+    help="Path to the input data file (CSV or XML), or a directory containing CSV/XML files"
 )
 parser.add_argument(
     "-o", "--output-dir",
@@ -105,6 +105,16 @@ output_dir = cli_args.output_dir
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 logging.info(f"Opening: {data_path}")
+if os.path.isdir(data_path):
+    data_paths = sorted(
+        os.path.join(data_path, name)
+        for name in os.listdir(data_path)
+        if name.lower().endswith((".csv", ".xml"))
+    )
+    if not data_paths:
+        raise Exception(f"No CSV or XML files found in directory: {data_path}")
+else:
+    data_paths = [data_path]
 
 ################################################################
 ##### GRAPH INIT #####
@@ -168,31 +178,45 @@ def apply_mapping(row, mapping, graph):
 
     # Check if this is a datatype value
     try:
-        if row[mapping["val_source"]] or mapping["value"]:
-            # Get the datatype
+        if "datatype" in mapping:
             datatype = create_uri_from_string(mapping["datatype"])
-            # Get the value for the literal
-            # There are two ways to do this, with val_source checked first
-            # The spec says that val_source and value are exlusive
-            try:
-                # Retrieve the data from a row in the data source
-                val = row[mapping["val_source"]]
-            except KeyError:
-                # The data is hardcoded as part of the mapping
-                try:
-                    val = mapping["value"]
-                except KeyError:
-                    msg = "'value' or 'val_source' must be defined for a datatype node."
-                    logging.error(msg)
-                    raise Exception(msg)
+            val = None
+            if "val_source" in mapping:
+                val_source = mapping["val_source"]
+                if isinstance(val_source, list):
+                    for source in val_source:
+                        candidate = row.get(source, "")
+                        if isinstance(candidate, str):
+                            candidate = candidate.strip()
+                        if candidate not in (None, ""):
+                            val = candidate
+                            break
+                    if val is None:
+                        val = ""
+                else:
+                    val = row.get(val_source, "")
+            elif "value" in mapping:
+                val = mapping["value"]
+            else:
+                msg = "'value' or 'val_source' must be defined for a datatype node."
+                logging.error(msg)
+
+            if val is None:
+                return None
+            if isinstance(val, str):
+                val = val.strip()
+            if val == "":
+                logging.info("Datatype node has no value, skipping.")
+                return None
+
             # Encode the data
             literal_value = Literal(val, datatype=datatype)
             # Return it to be linked
             # There should never be a connection from a datatype node
             return literal_value
     except KeyError:
-        """Just means it's not a datatype, so we keep going"""
-        logging.info("Not a datatype node, keep going.")
+        logging.info("Not a datatype node, keep going. Just means it's not a datatype, so we keep going")
+
 
     # Create the node for the current layer
     # Mint a URI for the node
@@ -217,19 +241,18 @@ def apply_mapping(row, mapping, graph):
     # Create the URI from the constructed string
     instance_uri = URIRef(instance_uri_string)
 
+    required = mapping.get("required", False)
+
+    # Detect if there are multiple types, but only emit them if the node
+    # actually has populated downstream content.
     # Add types, if desired
+    types = list()
     try:
         # Detect if there are multiple types
-        types = list()
         if isinstance(mapping["type"], str):
             types.append(mapping["type"])
         else:
             types = mapping["type"]
-        for t in types:
-            # Declare the class (i.e., type) of this node
-            class_uri = create_uri_from_string(t)
-            # Add it to the graph fragment
-            graph.add((instance_uri, a, class_uri))
     except KeyError:
         try:
             ref = mapping["ref"]
@@ -240,10 +263,13 @@ def apply_mapping(row, mapping, graph):
             logging.warning(f"Added instance without type: {instance_uri}")
 
     # Connect this node to next layer
+    has_connection = False
     try:
         for connection in mapping["connections"]:
             # Get URI for target (i.e., the object)
             target_uri = apply_mapping(row, connection["o"], graph)
+            if target_uri is None:
+                continue
             # Get URI(s) for predicates
             preds = connection["p"]
             if not isinstance(preds, list):
@@ -251,13 +277,26 @@ def apply_mapping(row, mapping, graph):
             for pred in preds:
                 pred_uri = create_uri_from_string(pred)
                 graph.add((instance_uri, pred_uri, target_uri))
+                has_connection = True
             try:
                 inv_uri = create_uri_from_string(connection["inv"])
                 graph.add((target_uri, inv_uri, instance_uri))
+                has_connection = True
             except KeyError:
-                """There is no inverse, which is ok."""
+                logging.info("No inverse connection defined, skipping. There is no inverse, which is ok.")
     except KeyError:
-        """There are no downstream connections, which is ok."""
+        logging.info("No connections defined, skipping. There are no downstream connections, which is ok.")
+
+    if required and not ref and not has_connection:
+        logging.info(f"Node has no populated connections, skipping: {instance_uri} and its downstream content.")
+        return None
+
+    for t in types:
+        # Declare the class (i.e., type) of this node
+        class_uri = create_uri_from_string(t)
+        # Add it to the graph fragment
+        graph.add((instance_uri, a, class_uri))
+
     return instance_uri
 
 
@@ -265,7 +304,12 @@ def iter_val_sources(mapping_node):
     """Yield every val_source used anywhere in the mapping."""
     if isinstance(mapping_node, dict):
         if "val_source" in mapping_node:
-            yield mapping_node["val_source"]
+            val_source = mapping_node["val_source"]
+            if isinstance(val_source, list):
+                for source in val_source:
+                    yield source
+            else:
+                yield val_source
         # datatype nodes also live under "o"
         for k, v in mapping_node.items():
             if isinstance(v, (dict, list)):
@@ -356,57 +400,13 @@ def build_row_from_xml(xml_path, mapping):
                     seen_rows.add(sig)
 
     return rows
-
-j = 0
-rows = None
-if data_path.lower().endswith(".xml"):
-    rows = build_row_from_xml(data_path, mapping)
-
-    # Generate any constants (e.g., controlled vocabularies)
-    try:
-        for i, cv in enumerate(mapping["cvs"]):
-            # Create an empty graph
-            graph = init_kg()
-            # Apply the mapping (pass by reference)
-            class_uri = create_uri_from_string(cv["type"])
-            for instance in cv["instances"]:
-                instance_uri_string = f"{cv['uri']}.{instance}"
-                instance_uri = create_uri_from_string(instance_uri_string)
-                graph.add((instance_uri, a, class_uri))
-            # Serialize and output the fragment
-            logging.info("Serializing the fragment.")
-            base = os.path.splitext(os.path.basename(data_path))[0]
-            output_file = f"output-cv-{base}-{i}.ttl"
-            output_path = os.path.join(output_dir, output_file)
-            graph.serialize(format="turtle", encoding="utf-8",
-                            destination=output_path)
-            logging.info("Serialized.")
-    except KeyError as e:
-        logging.info("No CVs detected.")
-
-    for row in rows:
-        # Create an empty graph
-        graph = init_kg()
-        # Apply the mapping (pass by reference)
-        apply_mapping(row, root, graph)
-        # Serialize and output the fragment
-        logging.info("Serializing the fragment.")
-        base = os.path.splitext(os.path.basename(data_path))[0]
-        output_file = f"output-{base}-{j}.ttl"
-        output_path = os.path.join(output_dir, output_file)
-        graph.serialize(format="turtle", encoding="utf-8",
-                        destination=output_path)
-        logging.info("Serialized.")
-        j += 1
-else:
-    # Get the data out of the CSV
-    with open(data_path, "r") as data_stream:
-        # Load the csv
-        logging.info("CSV Open success.")
-        reader = csv.DictReader(data_stream)
-        if reader == None:
-            logging.info("CSV Load failure.")
-        logging.info("CSV Load success.")
+for data_path in data_paths:
+    logging.info(f"Opening: {data_path}")
+    j = 0
+    rows = None
+    if data_path.lower().endswith(".xml"):
+        # Process the XML data
+        rows = build_row_from_xml(data_path, mapping)
 
         # Generate any constants (e.g., controlled vocabularies)
         try:
@@ -431,7 +431,7 @@ else:
             logging.info("No CVs detected.")
 
         # Apply the mapping for each row in the csv
-        for row in reader:
+        for row in rows:
             # Create an empty graph
             graph = init_kg()
             # Apply the mapping (pass by reference)
@@ -445,6 +445,53 @@ else:
                             destination=output_path)
             logging.info("Serialized.")
             j += 1
+    else:
+        # Get the data out of the CSV file
+        with open(data_path, "r") as data_stream:
+            # Load the csv
+            logging.info("CSV Open success.")
+            reader = csv.DictReader(data_stream)
+            if reader == None:
+                logging.info("CSV Load failure.")
+            logging.info("CSV Load success.")
+
+            # Generate any constants (e.g., controlled vocabularies)
+            try:
+                for i, cv in enumerate(mapping["cvs"]):
+                    # Create an empty graph
+                    graph = init_kg()
+                    # Apply the mapping (pass by reference)
+                    class_uri = create_uri_from_string(cv["type"])
+                    for instance in cv["instances"]:
+                        instance_uri_string = f"{cv['uri']}.{instance}"
+                        instance_uri = create_uri_from_string(instance_uri_string)
+                        graph.add((instance_uri, a, class_uri))
+                    # Serialize and output the fragment
+                    logging.info("Serializing the fragment.")
+                    base = os.path.splitext(os.path.basename(data_path))[0]
+                    output_file = f"output-cv-{base}-{i}.ttl"
+                    output_path = os.path.join(output_dir, output_file)
+                    graph.serialize(format="turtle", encoding="utf-8",
+                                    destination=output_path)
+                    logging.info("Serialized.")
+            except KeyError as e:
+                logging.info("No CVs detected.")
+
+            # Apply the mapping for each row in the csv
+            for row in reader:
+                # Create an empty graph
+                graph = init_kg()
+                # Apply the mapping (pass by reference)
+                apply_mapping(row, root, graph)
+                # Serialize and output the fragment
+                logging.info("Serializing the fragment.")
+                base = os.path.splitext(os.path.basename(data_path))[0]
+                output_file = f"output-{base}-{j}.ttl"
+                output_path = os.path.join(output_dir, output_file)
+                graph.serialize(format="turtle", encoding="utf-8",
+                                destination=output_path)
+                logging.info("Serialized.")
+                j += 1
 
 # Usage:
 #   python kastle-foundry.py \
