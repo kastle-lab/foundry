@@ -215,7 +215,7 @@ def apply_mapping(row, mapping, graph):
             # There should never be a connection from a datatype node
             return literal_value
     except KeyError:
-        logging.info("Not a datatype node, keep going. Just means it's not a datatype, so we keep going")
+        logging.info("Not a datatype node. It just means it's not a datatype, so we keep going...")
 
 
     # Create the node for the current layer
@@ -263,13 +263,14 @@ def apply_mapping(row, mapping, graph):
             logging.warning(f"Added instance without type: {instance_uri}")
 
     # Connect this node to next layer
-    has_connection = False
+    has_no_connection = False
     try:
         for connection in mapping["connections"]:
             # Get URI for target (i.e., the object)
             target_uri = apply_mapping(row, connection["o"], graph)
             if target_uri is None:
                 continue
+            has_no_connection = True if target_uri is not None else has_no_connection
             # Get URI(s) for predicates
             preds = connection["p"]
             if not isinstance(preds, list):
@@ -277,18 +278,19 @@ def apply_mapping(row, mapping, graph):
             for pred in preds:
                 pred_uri = create_uri_from_string(pred)
                 graph.add((instance_uri, pred_uri, target_uri))
-                has_connection = True
             try:
                 inv_uri = create_uri_from_string(connection["inv"])
                 graph.add((target_uri, inv_uri, instance_uri))
-                has_connection = True
             except KeyError:
                 logging.info("No inverse connection defined, skipping. There is no inverse, which is ok.")
     except KeyError:
         logging.info("No connections defined, skipping. There are no downstream connections, which is ok.")
 
-    if required and not ref and not has_connection:
-        logging.info(f"Node has no populated connections, skipping: {instance_uri} and its downstream content.")
+    if has_no_connection:
+        if required:
+            logging.error(f"Node has no populated connections, skipping: {instance_uri} and its downstream content.")
+        else:
+            logging.info(f"Node has no populated connections, skipping: {instance_uri} and its downstream content.")
         return None
 
     for t in types:
@@ -384,6 +386,7 @@ def build_row_from_xml(xml_path, mapping):
 
     rows = [row]
 
+    # Helper script to return a tuple (rows) of all items sorted by key.
     def row_sig(d):
         return tuple(sorted(d.items()))
 
@@ -400,6 +403,8 @@ def build_row_from_xml(xml_path, mapping):
                     seen_rows.add(sig)
 
     return rows
+
+
 for data_path in data_paths:
     logging.info(f"Opening: {data_path}")
     j = 0
@@ -496,7 +501,7 @@ for data_path in data_paths:
 # Usage:
 #   python kastle-foundry.py \
 #       -m <mapping_file> \
-#       -d <data_file/data_dir> \
+#       -d <data_file_path (or) data_dir_path> \
 #       -o <output_dir> \
 #       --namespace <namespace> \
 #       [--prefix <prefix_for_namespace>] \
@@ -513,10 +518,19 @@ for data_path in data_paths:
 #        --prefix kwg \
 #        -v \
 #        --log-file kastle-foundry.log
+#
 #  Example 2:
 #    python kastle-foundry.py \
 #        -m example_inputs/earthquake-mapping.yaml \
 #        -d example_inputs/earthquake_example_data.csv \
+#        -o output/ \
+#        --namespace http://stko-kwg.geog.ucsb.edu/ \
+#        --prefix kwg
+#
+#  Example 3 (directory input):
+#    python kastle-foundry.py \
+#        -m example_inputs/earthquake-mapping.yaml \
+#        -d example_inputs/ \
 #        -o output/ \
 #        --namespace http://stko-kwg.geog.ucsb.edu/ \
 #        --prefix kwg
