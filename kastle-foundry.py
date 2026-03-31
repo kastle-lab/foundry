@@ -97,14 +97,10 @@ except KeyError:
 
 
 ################################################################
-##### DO MAPPING #####
+##### INPUT/OUTPUT INIT #####
 ################################################################
 # open the data file
 data_path = cli_args.data
-output_dir = cli_args.output_dir
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-logging.info(f"Opening: {data_path}")
 if os.path.isdir(data_path):
     data_paths = sorted(
         os.path.join(data_path, name)
@@ -115,6 +111,12 @@ if os.path.isdir(data_path):
         raise Exception(f"No CSV or XML files found in directory: {data_path}")
 else:
     data_paths = [data_path]
+logging.info(f"Opening: {data_path}")
+
+# set up output directory
+output_dir = cli_args.output_dir
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
 ################################################################
 ##### GRAPH INIT #####
@@ -171,18 +173,42 @@ def create_uri_from_string(s):
     return pfs[prefix][classname]
 
 
+def log_message_with_node(msg, mapping, error_type="info"):
+    mapping_copy = mapping.copy()
+    mapping_copy.pop('connections', None)
+    log_msg = f"{msg}: \n{'\t'*9}{mapping_copy}"
+    if error_type == "error":
+        logging.error(log_msg)
+    elif error_type == "warning":
+        logging.warning(log_msg)
+    else:
+        logging.info(log_msg)
+
 def apply_mapping(row, mapping, graph):
-    # Check if it's ONLY linking to a specific URI
+    # -------------------------
+    # Case 1: URI string
+    # -------------------------
     if isinstance(mapping, str):
         return create_uri_from_string(mapping)
 
-    # Check if this is a datatype value
+    # -------------------------
+    # Case 2: Datatype (literal)
+    # -------------------------
     try:
         if "datatype" in mapping:
+            # Get the datatype
             datatype = create_uri_from_string(mapping["datatype"])
+            required = mapping.get("required", False)
+
             val = None
+
+            # Get the value for the literal
+            # There are two ways to do this, with val_source checked first
+            # The spec says that val_source and value are exlusive
             if "val_source" in mapping:
                 val_source = mapping["val_source"]
+
+                # Retrieve the data from a row in the data source
                 if isinstance(val_source, list):
                     for source in val_source:
                         candidate = row.get(source, "")
@@ -191,22 +217,28 @@ def apply_mapping(row, mapping, graph):
                         if candidate not in (None, ""):
                             val = candidate
                             break
-                    if val is None:
-                        val = ""
                 else:
                     val = row.get(val_source, "")
             elif "value" in mapping:
+                # The data is hardcoded as part of the mapping
                 val = mapping["value"]
             else:
-                msg = "'value' or 'val_source' must be defined for a datatype node."
-                logging.error(msg)
-
-            if val is None:
+                msg = "'value' or 'val_source' must be defined for a datatype node. See info below:"
+                if required:
+                    logging.error(msg)
+                else:
+                    logging.warning(msg)
                 return None
+
             if isinstance(val, str):
                 val = val.strip()
-            if val == "":
-                logging.info("Datatype node has no value, skipping.")
+
+            if val in (None, ""):
+                msg = "Invalid retrieval from 'value' or 'val_source' for a datatype node. See info below:"
+                if required:
+                    logging.error(msg)
+                else:
+                    logging.warning(msg)
                 return None
 
             # Encode the data
@@ -214,13 +246,19 @@ def apply_mapping(row, mapping, graph):
             # Return it to be linked
             # There should never be a connection from a datatype node
             return literal_value
-    except KeyError:
-        logging.info("Not a datatype node. It just means it's not a datatype, so we keep going...")
 
+        else:
+            # Just means it's not a datatype, so we keep going
+            log_message_with_node("Not a datatype node, keep going", mapping)
 
-    # Create the node for the current layer
-    # Mint a URI for the node
+    except KeyError as e:
+        logging.error(f"Malformed datatype node missing key: {e}")
+
+    # -------------------------
+    # Case 3: Instance node
+    # -------------------------
     instance_uri_string = create_uri_from_string(mapping["uri"])
+
     try:
         varids = mapping["varids"]
         varid_vals = list()
@@ -228,31 +266,35 @@ def apply_mapping(row, mapping, graph):
             try:
                 varid_vals.append(quote(row[varid], safe=""))
             except KeyError:
-                msg = "Variable ID missing from data file."
-                logging.error(msg)
+                msg = "Variable ID missing from data file"
+                log_message_with_node(msg, mapping, error_type="error")
                 raise Exception(msg)
         instance_uri_string += "." + '.'.join(varid_vals)
         try:
             instance_uri_string += "." + mapping["appellation"]
         except KeyError:
-            logging.info("Appellation not defined, skipping.") # Appellation is optional
+            log_message_with_node("Appellation not defined, skipping", mapping, error_type="info") # Appellation is optional
     except KeyError:
-        logging.info("Varids not defined, skipping.") # Varids are optional, if unusual to be so
+        log_message_with_node("Varids not defined, skipping", mapping, error_type="warning") # Varids are optional, if unusual to be so
+
     # Create the URI from the constructed string
     instance_uri = URIRef(instance_uri_string)
 
-    required = mapping.get("required", False)
-
-    # Detect if there are multiple types, but only emit them if the node
-    # actually has populated downstream content.
-    # Add types, if desired
-    types = list()
+    # -------------------------
+    # Add types
+    # -------------------------
     try:
         # Detect if there are multiple types
+        types = list()
         if isinstance(mapping["type"], str):
             types.append(mapping["type"])
         else:
             types = mapping["type"]
+        for t in types:
+            # Declare the class (i.e., type) of this node
+            class_uri = create_uri_from_string(t)
+            # Add it to the graph fragment
+            graph.add((instance_uri, a, class_uri))
     except KeyError:
         try:
             ref = mapping["ref"]
@@ -260,44 +302,39 @@ def apply_mapping(row, mapping, graph):
             # If 'ref' is not explicitly defined, then it is false.
             ref = False
         if not ref:
-            logging.warning(f"Added instance without type: {instance_uri}")
+            log_message_with_node(f"Added instance without type: {instance_uri}", mapping, error_type="warning")
 
+    # -------------------------
+    # Connections
+    # -------------------------
     # Connect this node to next layer
-    has_no_connection = False
     try:
         for connection in mapping["connections"]:
             # Get URI for target (i.e., the object)
             target_uri = apply_mapping(row, connection["o"], graph)
+
             if target_uri is None:
+                logging.warning(f"Connection has no target URI, skipping:\n{'\t'*9}{instance_uri}\n{'\t'*9}{connection.get('p', 'UNKNOWN_PREDICATE')}\n{'\t'*9}{connection['o']}")
                 continue
-            has_no_connection = True if target_uri is not None else has_no_connection
+
             # Get URI(s) for predicates
             preds = connection["p"]
             if not isinstance(preds, list):
                 preds = [preds]
+
             for pred in preds:
                 pred_uri = create_uri_from_string(pred)
                 graph.add((instance_uri, pred_uri, target_uri))
+
             try:
                 inv_uri = create_uri_from_string(connection["inv"])
                 graph.add((target_uri, inv_uri, instance_uri))
             except KeyError:
-                logging.info("No inverse connection defined, skipping. There is no inverse, which is ok.")
+                # There is no inverse, which is ok.
+                log_message_with_node("No inverse connection defined, skipping", {"predicate": preds}, error_type="info")
     except KeyError:
-        logging.info("No connections defined, skipping. There are no downstream connections, which is ok.")
-
-    if has_no_connection:
-        if required:
-            logging.error(f"Node has no populated connections, skipping: {instance_uri} and its downstream content.")
-        else:
-            logging.info(f"Node has no populated connections, skipping: {instance_uri} and its downstream content.")
-        return None
-
-    for t in types:
-        # Declare the class (i.e., type) of this node
-        class_uri = create_uri_from_string(t)
-        # Add it to the graph fragment
-        graph.add((instance_uri, a, class_uri))
+        # There are no downstream connections, which is ok.
+        log_message_with_node("No connections defined, skipping", mapping, error_type="info")
 
     return instance_uri
 
@@ -425,7 +462,7 @@ for data_path in data_paths:
                     instance_uri = create_uri_from_string(instance_uri_string)
                     graph.add((instance_uri, a, class_uri))
                 # Serialize and output the fragment
-                logging.info("Serializing the fragment.")
+                logging.info(f"Serializing the cv fragment: '{cv.get('type', 'UNKNOWN_TYPE')}'")
                 base = os.path.splitext(os.path.basename(data_path))[0]
                 output_file = f"output-cv-{base}-{i}.ttl"
                 output_path = os.path.join(output_dir, output_file)
@@ -435,14 +472,14 @@ for data_path in data_paths:
         except KeyError as e:
             logging.info("No CVs detected.")
 
-        # Apply the mapping for each row in the csv
+        # Apply the mapping for each transformed row from the xml
         for row in rows:
             # Create an empty graph
             graph = init_kg()
             # Apply the mapping (pass by reference)
             apply_mapping(row, root, graph)
             # Serialize and output the fragment
-            logging.info("Serializing the fragment.")
+            logging.info(f"Serializing the fragment: {row}")
             base = os.path.splitext(os.path.basename(data_path))[0]
             output_file = f"output-{base}-{j}.ttl"
             output_path = os.path.join(output_dir, output_file)
@@ -472,7 +509,7 @@ for data_path in data_paths:
                         instance_uri = create_uri_from_string(instance_uri_string)
                         graph.add((instance_uri, a, class_uri))
                     # Serialize and output the fragment
-                    logging.info("Serializing the fragment.")
+                    logging.info(f"Serializing the cv fragment: '{cv.get('type', 'UNKNOWN_TYPE')}'")
                     base = os.path.splitext(os.path.basename(data_path))[0]
                     output_file = f"output-cv-{base}-{i}.ttl"
                     output_path = os.path.join(output_dir, output_file)
@@ -489,7 +526,7 @@ for data_path in data_paths:
                 # Apply the mapping (pass by reference)
                 apply_mapping(row, root, graph)
                 # Serialize and output the fragment
-                logging.info("Serializing the fragment.")
+                logging.info(f"Serializing the fragment: {row}")
                 base = os.path.splitext(os.path.basename(data_path))[0]
                 output_file = f"output-{base}-{j}.ttl"
                 output_path = os.path.join(output_dir, output_file)
