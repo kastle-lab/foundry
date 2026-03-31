@@ -194,61 +194,65 @@ def apply_mapping(row, mapping, graph):
     # -------------------------
     # Case 2: Datatype (literal)
     # -------------------------
-    if "datatype" in mapping:
-        # Get the datatype
-        datatype = create_uri_from_string(mapping["datatype"])
-        required = mapping.get("required", False)
+    try:
+        if "datatype" in mapping:
+            # Get the datatype
+            datatype = create_uri_from_string(mapping["datatype"])
+            required = mapping.get("required", False)
 
-        val = None
+            val = None
 
-        # Get the value for the literal
-        # There are two ways to do this, with val_source checked first
-        # The spec says that val_source and value are exlusive
-        if "val_source" in mapping:
-            val_source = mapping["val_source"]
+            # Get the value for the literal
+            # There are two ways to do this, with val_source checked first
+            # The spec says that val_source and value are exlusive
+            if "val_source" in mapping:
+                val_source = mapping["val_source"]
 
-            # Retrieve the data from a row in the data source
-            if isinstance(val_source, list):
-                for source in val_source:
-                    candidate = row.get(source, "")
-                    if isinstance(candidate, str):
-                        candidate = candidate.strip()
-                    if candidate not in (None, ""):
-                        val = candidate
-                        break
+                # Retrieve the data from a row in the data source
+                if isinstance(val_source, list):
+                    for source in val_source:
+                        candidate = row.get(source, "")
+                        if isinstance(candidate, str):
+                            candidate = candidate.strip()
+                        if candidate not in (None, ""):
+                            val = candidate
+                            break
+                else:
+                    val = row.get(val_source, "")
+            elif "value" in mapping:
+                # The data is hardcoded as part of the mapping
+                val = mapping["value"]
             else:
-                val = row.get(val_source, "")
-        elif "value" in mapping:
-            # The data is hardcoded as part of the mapping
-            val = mapping["value"]
+                msg = "'value' or 'val_source' must be defined for a datatype node. See info below:"
+                if required:
+                    logging.error(msg)
+                else:
+                    logging.warning(msg)
+                return None
+
+            if isinstance(val, str):
+                val = val.strip()
+
+            if val in (None, ""):
+                msg = "Invalid retrieval from 'value' or 'val_source' for a datatype node. See info below:"
+                if required:
+                    logging.error(msg)
+                else:
+                    logging.warning(msg)
+                return None
+
+            # Encode the data
+            literal_value = Literal(val, datatype=datatype)
+            # Return it to be linked
+            # There should never be a connection from a datatype node
+            return literal_value
+
         else:
-            msg = "'value' or 'val_source' must be defined for a datatype node. See info below:"
-            if required:
-                logging.error(msg)
-            else:
-                logging.warning(msg)
-            return None
+            # Just means it's not a datatype, so we keep going
+            log_message_with_node("Not a datatype node, keep going", mapping)
 
-        if isinstance(val, str):
-            val = val.strip()
-
-        if val in (None, ""):
-            msg = "Invalid retrieval from 'value' or 'val_source' for a datatype node. See info below:"
-            if required:
-                logging.error(msg)
-            else:
-                logging.warning(msg)
-            return None
-
-        # Encode the data
-        literal_value = Literal(val, datatype=datatype)
-        # Return it to be linked
-        # There should never be a connection from a datatype node
-        return literal_value
-
-    else:
-        # Just means it's not a datatype, so we keep going
-        log_message_with_node("Not a datatype node, keep going", mapping)
+    except KeyError as e:
+        logging.error(f"Malformed datatype node missing key: {e}")
 
     # -------------------------
     # Case 3: Instance node
