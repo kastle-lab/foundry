@@ -30,7 +30,7 @@ python kastle-foundry.py \
   [-v] \
   [--log-file <logfile_name>]
 ```
-**Note**: *Using verbose debug logging may consume significant storage space for larger datsets.* 
+**Note**: *Using verbose debug logging may consume significant storage space for larger datasets.* 
 
 Arguments:
 
@@ -60,7 +60,7 @@ python kastle-foundry.py \
   --log-file kastle-foundry.log
 ```
 
-You can also point `-d` to `example_inputs/` and it will process all CSV/XML files in that directory.
+As shown in the example, using `-d` to `example_inputs/` will process all CSV/XML files in that directory. 
 
 ## Mapping Model
 
@@ -113,7 +113,7 @@ root: # (required)
 - `connections`: list of downstream predicate-object mappings.
 - `inv`: inverse predicate for a connection.
 - `datatype`: marks a node as a datatype/literal node and sets literal datatype URI.
-- `val_source`: input field name or ordered list of field names (first non-empty wins).
+- `val_source`: input field name or ordered list of field names (if `value` is also present, uses `val_source` first).
 - `value`: constant literal value fallback when `val_source` is not provided.
 - `required`: boolean flag on datatype nodes; logs error (`true`) vs warning (`false`) when literal value is missing.
 - `ref`: boolean flag for untyped instance references; suppresses untyped-node warning when `true`.
@@ -179,7 +179,7 @@ Both predicates are emitted for the same object.
     val_source: "mag"
 ```
 
-`val_source` can also be a list; the first non-empty value is used.
+`val_source` can also be a list; it will mint a literal for each item in that list.
 
 ### 5) Literal Node With Constant Value (`value`)
 
