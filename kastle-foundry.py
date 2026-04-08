@@ -149,6 +149,9 @@ pfs = {
 # rdf:type shortcut
 a = pfs["rdf"]["type"]
 
+# Unique Global Vars
+indent = "\t" * 9
+
 # Initialization shortcut
 def init_kg(prefixes=pfs):
     kg = Graph()
@@ -176,7 +179,7 @@ def create_uri_from_string(s):
 def log_message_with_node(msg, mapping, error_type="info"):
     mapping_copy = mapping.copy()
     mapping_copy.pop('connections', None)
-    log_msg = f"{msg}: \n{'\t'*9}{mapping_copy}"
+    log_msg = f"{msg}: \n{indent}{mapping_copy}"
     if error_type == "error":
         logging.error(log_msg)
     elif error_type == "warning":
@@ -314,7 +317,7 @@ def apply_mapping(row, mapping, graph):
             target_uri = apply_mapping(row, connection["o"], graph)
 
             if target_uri is None:
-                logging.warning(f"Connection has no target URI, skipping:\n{'\t'*9}{instance_uri}\n{'\t'*9}{connection.get('p', 'UNKNOWN_PREDICATE')}\n{'\t'*9}{connection['o']}")
+                logging.warning(f"Connection has no target URI, skipping:\n{indent}{instance_uri}\n{indent}{connection.get('p', 'UNKNOWN_PREDICATE')}\n{indent}{connection['o']}")
                 continue
 
             # Get URI(s) for predicates
