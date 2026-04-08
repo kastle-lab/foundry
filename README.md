@@ -17,7 +17,8 @@ pip install rdflib pyyaml
 
 ## CLI Usage
 
-Run the script:
+
+To run the script: 
 
 ```bash
 python kastle-foundry.py \
@@ -29,6 +30,7 @@ python kastle-foundry.py \
   [-v] \
   [--log-file <logfile_name>]
 ```
+**Note**: *Using verbose debug logging may consume significant storage space for larger datsets.* 
 
 Arguments:
 
@@ -45,7 +47,7 @@ Output naming:
 - row graphs: `output-<input_basename>-<index>.ttl`
 - controlled vocabulary graphs (`cvs`): `output-cv-<input_basename>-<index>.ttl`
 
-### CLI With Include Example
+### CLI Usage With Included Example
 
 ```bash
 python kastle-foundry.py \
@@ -61,13 +63,6 @@ python kastle-foundry.py \
 You can also point `-d` to `example_inputs/` and it will process all CSV/XML files in that directory.
 
 ## Mapping Model
-
-The mapping requires a `root` node. Each node can create:
-
-- an instance node (`uri`, optional `type`, optional `varids`, optional `appellation`)
-- a literal/datatype node (`datatype` + `val_source` or `value`)
-- a direct URI object (`o: "prefix:name"`)
-## Full Reference
 
 ```yaml
 root: # (required)
@@ -104,10 +99,24 @@ root: # (required)
         value: "value"
 ```
 ### Arguments
-- `type`: 
-- `p`:  
-- `val_source`:
-- `varids`: 
+#### Required
+- `root`: top-level mapping key.
+- `uri`: required for instance nodes.
+- `p`: required for each connection; list is allowed.
+- `o`: required for each connection. Can be a nested mapping object or a direct URI-like string.
+- Datatype-node value source: when `datatype` is present, at least one of `val_source` or `value` must be provided.
+
+#### Optional
+- `type`: instance rdf:type; accepts a single URI-like string or a list of strings.
+- `varids`: list of input-field names appended (dot-separated, URL-encoded) to `uri`.
+- `appellation`: constant suffix appended after `varids`.
+- `connections`: list of downstream predicate-object mappings.
+- `inv`: inverse predicate for a connection.
+- `datatype`: marks a node as a datatype/literal node and sets literal datatype URI.
+- `val_source`: input field name or ordered list of field names (first non-empty wins).
+- `value`: constant literal value fallback when `val_source` is not provided.
+- `required`: boolean flag on datatype nodes; logs error (`true`) vs warning (`false`) when literal value is missing.
+- `ref`: boolean flag for untyped instance references; suppresses untyped-node warning when `true`.
 
 
 ## Minimal root example:
@@ -190,9 +199,9 @@ Both predicates are emitted for the same object.
 
 In this form, `o` is used directly as a URI reference (no `varids`/`appellation` processing).
 
-## Prefix Rules
+### Prefix Rules
 
-String values like `kwg-ont:Earthquake` must use known prefixes.
+String values like `kwg-ont:Earthquake`, from the example, must use known prefixes.
 Known prefixes include:
 
 - `<prefix>-r` and `<prefix>-ont` from CLI `--prefix` and `--namespace`
