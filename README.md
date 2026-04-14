@@ -4,7 +4,9 @@ Kastle Foundry generates RDF/Turtle files from a YAML mapping and CSV or XML inp
 It creates one graph fragment per input row.
 
 ## Requirements
+
 ### Dependecies
+
 - Python 3.10+
 - `rdflib`
 - `pyyaml`
@@ -15,10 +17,13 @@ Install dependencies:
 pip install rdflib pyyaml
 ```
 
+###### _IMPORTANT NOTE:_
+
+&emsp;For CSV files you must use a `UTF-8` encoding. Otherwise, the program may have unexpected behavior.
+
 ## CLI Usage
 
-
-To run the script: 
+To run the script:
 
 ```bash
 python kastle-foundry.py \
@@ -30,7 +35,8 @@ python kastle-foundry.py \
   [-v] \
   [--log-file <logfile_name>]
 ```
-**Note**: *Using verbose debug logging may consume significant storage space for larger datasets.* 
+
+**Note**: _Using verbose debug logging may consume significant storage space for larger datasets._
 
 Arguments:
 
@@ -60,46 +66,49 @@ python kastle-foundry.py \
   --log-file kastle-foundry.log
 ```
 
-As shown in the example, using `-d` to `example_inputs/` will process all CSV/XML files in that directory. 
+As shown in the example, using `-d` to `example_inputs/` will process all CSV/XML files in that directory.
 
 ## Mapping Model
 
 ```yaml
 root: # (required)
-  type: "type"                   # (optional) the rdf:type of the node if absent, will log a warning unless suppressed by "ref: true"
-  uri:  "uri"                    # (required) the base URI for this instance
-  varids: ["id"]                 # (optional) this is a list of values from the row in the CSV to create a unique URI.
-  appellation: "appellation"     # (optional) this is a string to add at the end of the URI.
-  connections:                   # (optional) this is a dict of connections 
-    - p: "predicate"             # (required) the predicate to connect to the next node
-      inv: "inverse"             # (optional) the inverse predicate
-      o:                         # (required) the object of the triple / the next node. It has the same attributes as "root"
+  type: "type" # (optional) the rdf:type of the node if absent, will log a warning unless suppressed by "ref: true"
+  uri: "uri" # (required) the base URI for this instance
+  varids: ["id"] # (optional) this is a list of values from the row in the CSV to create a unique URI.
+  appellation: "appellation" # (optional) this is a string to add at the end of the URI.
+  connections: # (optional) this is a dict of connections
+    - p: "predicate" # (required) the predicate to connect to the next node
+      inv: "inverse" # (optional) the inverse predicate
+      o: # (required) the object of the triple / the next node. It has the same attributes as "root"
         type: ["type1", "type2"] # the node can have multiple types
         uri: uri
         varids: ["id"]
         appellation: "appellation"
     # There can be more than one connection from this node
-    - p: "predicate"             # (required) the predicate to connect to the next node
-      o:                         # (required) the attributes below are for a datatype node
-        datatype: "datatype"     # (optional) the URI for the datatype, if this attribute is present (checked first) an rdf:type will NOT be assigned.
+    - p: "predicate" # (required) the predicate to connect to the next node
+      o: # (required) the attributes below are for a datatype node
+        datatype: "datatype" # (optional) the URI for the datatype, if this attribute is present (checked first) an rdf:type will NOT be assigned.
         val_source: "val_source" # (exclusive 'or' with value, required) the source column for this literal, used first if both are present
-        value: "value"           # (exclusive 'or' with val_source, required) the datum value for this literal
-        required: true           # (optional) ensures an error occurs if true, or a warning if false (defaults to false) for a missing val_source or value.
+        value: "value" # (exclusive 'or' with val_source, required) the datum value for this literal
+        required: true # (optional) ensures an error occurs if true, or a warning if false (defaults to false) for a missing val_source or value.
     - p: "predicate"
-      o: "uri"                   # (exlusive 'or' with root attributes) a URI to use directly (i.e., the script will not even look for varids or appellation)
+      o: "uri" # (exlusive 'or' with root attributes) a URI to use directly (i.e., the script will not even look for varids or appellation)
     - p: "predicate"
       o:
         uri: "kwg-r:instant"
         varids: ["id"]
-        ref: true                # (optional) reference an existing URI pattern without adding type; suppresses untyped warning
+        ref: true # (optional) reference an existing URI pattern without adding type; suppresses untyped warning
     - p: ["predicate", "predicate"] # it's possible to point to the same object with multiple predicates (rare usecase, but essentially shortcuts the use of a po: with ref construction)
-      o: 
+      o:
         datatype: "datatype"
         val_source: ["val_source_1", "val_source_2"]
         value: "value"
 ```
+
 ### Arguments
+
 #### Required
+
 - `root`: top-level mapping key.
 - `uri`: required for instance nodes.
 - `p`: required for each connection; list is allowed.
@@ -107,6 +116,7 @@ root: # (required)
 - Datatype-node value source: when `datatype` is present, at least one of `val_source` or `value` must be provided.
 
 #### Optional
+
 - `type`: instance rdf:type; accepts a single URI-like string or a list of strings.
 - `varids`: list of input-field names appended (dot-separated, URL-encoded) to `uri`.
 - `appellation`: constant suffix appended after `varids`.
@@ -117,7 +127,6 @@ root: # (required)
 - `value`: constant literal value fallback when `val_source` is not provided.
 - `required`: boolean flag on datatype nodes; logs error (`true`) vs warning (`false`) when literal value is missing.
 - `ref`: boolean flag for untyped instance references; suppresses untyped-node warning when `true`.
-
 
 ## Minimal root example:
 
