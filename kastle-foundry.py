@@ -267,7 +267,7 @@ def apply_mapping(row, mapping, graph):
         varid_vals = list()
         for varid in varids:
             try:
-                varid_vals.append(quote(row[varid], safe=""))
+                varid_vals.append(quote(row[varid], safe="").replace(".", "%2E"))
             except KeyError:
                 msg = "Variable ID missing from data file"
                 log_message_with_node(msg, mapping, error_type="error")
