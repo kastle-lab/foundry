@@ -492,7 +492,7 @@ for data_path in data_paths:
             j += 1
     else:
         # Get the data out of the CSV file
-        with open(data_path, "r") as data_stream:
+        with open(data_path, "r", encoding='utf-8-sig') as data_stream:
             # Load the csv
             logging.info("CSV Open success.")
             reader = csv.DictReader(data_stream)
