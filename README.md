@@ -105,11 +105,11 @@ The `cvs` block is used to create controlled vocabularies (CVs) which can then b
 #### Mapping Model
 
 ```yaml
-cvs: # beginning of cvs block
-  - cv: # a single controlled vocabulary
-    type: "type" # the rdf:type of the node
-    uri: "uri" # the base URI for this instance
-    instances: ["instance1", "instance2"] # a list of instances belonging to this controlled vocabulary
+cvs: # (required) beginning of cvs block
+  - cv: # (required) a single controlled vocabulary
+    type: "type" # (required) the rdf:type of the node
+    uri: "uri" # (required) the base URI for this instance
+    instances: ["instance1", "instance2"] # (required) a list of instances belonging to this controlled vocabulary
 ```
 
 #### Arguments
@@ -123,11 +123,11 @@ cvs: # beginning of cvs block
 #### Example
 
 ```yaml
-cvs: # (required) beginning of cvs block
-  - cv: # (required) a single controlled vocabulary
-    type: "kwg-ont:EarthquakeObservableProperty" # (required) the rdf:type of the node
-    uri: "kwg-r:earthquakeObservableProperty" # (required) the base URI for this instance
-    instances: ["depth", "mag", "magType", "nst", "gap", "dmin", "rms", "net", "type", "horizontalError", "depthError", "magError", "magNst", "status","locationSource", "magSource"] # (required) a list of instances belonging to this controlled vocabulary
+cvs:
+  - cv:
+    type: "kwg-ont:EarthquakeObservableProperty"
+    uri: "kwg-r:earthquakeObservableProperty"
+    instances: ["depth", "mag", "magType", "nst", "gap", "dmin", "rms", "net", "type", "horizontalError", "depthError", "magError", "magNst", "status","locationSource", "magSource"]
 ```
 
 ### Graph Construction (`root`)
