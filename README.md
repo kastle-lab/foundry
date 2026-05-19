@@ -74,7 +74,7 @@ The YAML mapping files are generally constructed manually to represent the *mapp
 
 ### Metadata (`metadata`)
 
-The `metadata` block is currently not used but will be incorporated later to associate data files with mapping files based on the data format.
+The `metadata` block is currently not used but will be incorporated later to associate data files with mapping files based on the data format. For now, it provides basic information about the mapping file.
 
 #### Mapping Model
 
@@ -100,7 +100,7 @@ metadata:
 
 ### Controlled Vocabularies (`cvs`)
 
-The `cvs` block is used to create controlled vocabularies (CVs) which can then be re-used in the rest of the graph.
+The `cvs` block is used to create controlled vocabularies (CVs) which can then be re-used in the rest of the graph. The entire block is optional, but each component should be included if it is used.
 
 #### Mapping Model
 
