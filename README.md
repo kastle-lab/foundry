@@ -100,7 +100,7 @@ metadata:
 
 ### Controlled Vocabularies (`cvs`)
 
-The `cvs` block is used to create controlled vocabularies (CVs) which can then be re-used in the rest of the graph. The entire block is optional, but each component should be included if it is used.
+The `cvs` block is used to create controlled vocabularies (CVs) which can then be re-used in the rest of the graph. Currently, the exact URI for a CV must be referenced in the `root` block (below) for it to be used. The entire `cvs` block is optional, but each component should be included if it is used.
 
 #### Mapping Model
 
