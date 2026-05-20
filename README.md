@@ -68,7 +68,73 @@ python kastle-foundry.py \
 
 As shown in the example, using `-d` to `example_inputs/` will process all CSV/XML files in that directory.
 
-## Mapping Model
+## Mapping Files
+
+The YAML mapping files are generally constructed manually to represent the *mapping* of the provided CSV or XML data into the schema. There are three primary components or blocks: `metadata`, `cvs`, and `root`.
+
+### Metadata (`metadata`)
+
+The `metadata` block is currently not used but will be incorporated later to associate data files with mapping files based on the data format. For now, it provides basic information about the mapping file.
+
+#### Mapping Model
+
+```yaml
+metadata: # beginning of metadata block
+  name: "name" # unique name or identifier for YAML file
+  source_ext: "extension" # extenstion of associated data file
+```
+
+#### Arguments
+
+- `metadata`: top-level mapping key.
+- `name`: string identifier for YAML file.
+- `source_ext`: string identifier for the necessary data file format (in cases where both CSV and XML are being used).
+
+#### Example
+
+```yaml
+metadata:
+  name: "Earthquake Mapping"
+  source_ext: "csv"
+```
+
+### Controlled Vocabularies (`cvs`)
+
+The `cvs` block is used to create controlled vocabularies (CVs) which can then be re-used in the rest of the graph. Currently, the exact URI for a CV must be referenced in the `root` block (below) for it to be used. The entire `cvs` block is optional, but each component should be included if it is used.
+
+#### Mapping Model
+
+```yaml
+cvs: # (required) beginning of cvs block
+  - cv: # (required) a single controlled vocabulary
+    type: "type" # (required) the rdf:type of the node
+    uri: "uri" # (required) the base URI for this instance
+    instances: ["instance1", "instance2"] # (required) a list of instances belonging to this controlled vocabulary
+```
+
+#### Arguments
+
+- `cvs`: top-level mapping key.
+- `cv`: mapping key for each unique CV; each CV will have this key repeated.
+- `type`: instance rdf:type; accepts a single URI-like string or a list of strings.
+- `uri`: the base URI for this instance; accepts a single URI-like string or a list of strings.
+- `instances`: list of constant suffixes appended after `uri` (each one at a time).
+
+#### Example
+
+```yaml
+cvs:
+  - cv:
+    type: "kwg-ont:EarthquakeObservableProperty"
+    uri: "kwg-r:earthquakeObservableProperty"
+    instances: ["depth", "mag", "magType", "nst", "gap", "dmin", "rms", "net", "type", "horizontalError", "depthError", "magError", "magNst", "status","locationSource", "magSource"]
+```
+
+### Graph Construction (`root`)
+
+The `root` block is used to materialize the graph. This is the most important and generally most complex component of the mapping files.
+
+#### Mapping Model
 
 ```yaml
 root: # (required)
@@ -105,9 +171,9 @@ root: # (required)
         value: "value"
 ```
 
-### Arguments
+#### Arguments
 
-#### Required
+##### Required
 
 - `root`: top-level mapping key.
 - `uri`: required for instance nodes.
@@ -115,7 +181,7 @@ root: # (required)
 - `o`: required for each connection. Can be a nested mapping object or a direct URI-like string.
 - Datatype-node value source: when `datatype` is present, at least one of `val_source` or `value` must be provided.
 
-#### Optional
+##### Optional
 
 - `type`: instance rdf:type; accepts a single URI-like string or a list of strings.
 - `varids`: list of input-field names appended (dot-separated, URL-encoded) to `uri`.
@@ -128,7 +194,7 @@ root: # (required)
 - `required`: boolean flag on datatype nodes; logs error (`true`) vs warning (`false`) when literal value is missing.
 - `ref`: boolean flag for untyped instance references; suppresses untyped-node warning when `true`.
 
-## Minimal root example:
+#### Minimal root example:
 
 ```yaml
 root:
@@ -140,9 +206,9 @@ root:
 `varids` are appended to the URI as dot-separated, URL-encoded values.
 If `appellation` is present, it is appended after `varids`.
 
-## Complex Behaviors
+#### Complex Behaviors
 
-### 1) Referencing a Node Without Adding Type (`ref: true`)
+##### 1) Referencing a Node Without Adding Type (`ref: true`)
 
 Use `ref: true` when you intentionally point to an instance URI without assigning a type in that branch.
 This suppresses the untyped-node warning.
@@ -157,7 +223,7 @@ This suppresses the untyped-node warning.
 
 **Note**: `ref: true` does not create special link semantics; it only suppresses the missing-type warning. Reusing the same URI is what makes multiple branches point to the same resource.
 
-### 2) Inverse Predicate (`inv`)
+##### 2) Inverse Predicate (`inv`)
 
 ```yaml
 - p: "sosa:isFeatureOfInterestOf"
@@ -170,7 +236,7 @@ This suppresses the untyped-node warning.
 
 This adds both `(subject p object)` and `(object inv subject)`.
 
-### 3) Multiple Predicates to the Same Object
+##### 3) Multiple Predicates to the Same Object
 
 ```yaml
 - p: ["geo:hasGeometry", "geo:hasDefaultGeometry"]
@@ -179,7 +245,7 @@ This adds both `(subject p object)` and `(object inv subject)`.
 
 Both predicates are emitted for the same object.
 
-### 4) Literal Node From Input Data (`val_source`)
+##### 4) Literal Node From Input Data (`val_source`)
 
 ```yaml
 - p: "sosa:hasSimpleResult"
@@ -190,7 +256,7 @@ Both predicates are emitted for the same object.
 
 `val_source` can also be a list; it will mint a literal for each item in that list.
 
-### 5) Literal Node With Constant Value (`value`)
+##### 5) Literal Node With Constant Value (`value`)
 
 ```yaml
 - p: "rdfs:label"
@@ -199,7 +265,7 @@ Both predicates are emitted for the same object.
     value: "EARTHQUAKE!"
 ```
 
-### 6) Direct URI Object
+##### 6) Direct URI Object
 
 ```yaml
 - p: "sosa:observedProperty"
@@ -208,7 +274,7 @@ Both predicates are emitted for the same object.
 
 In this form, `o` is used directly as a URI reference (no `varids`/`appellation` processing).
 
-### Prefix Rules
+##### Prefix Rules
 
 String values like `kwg-ont:Earthquake`, from the example, must use known prefixes.
 Known prefixes include:
