@@ -1,0 +1,968 @@
+root:
+  type: aplo-ont:LearningObjective
+  uri: aplo-r:learningObjective
+  connections:
+  - p: aplo-ont:alignedWith
+    inv: aplo-ont:isAlignmentFor
+    o:
+      type: aplo-ont:PedagogicalElement
+      uri: aplo-r:pedagogicalElement
+      connections:
+      - p: aplo-ont:hasNextPedagogicalElement
+        inv: aplo-ont:hasPreviousPedagogicalElement
+        o:
+          type: aplo-ont:PedagogicalElement
+          uri: aplo-r:pedagogicalElement
+      - p: aplo-ont:hasPreviousPedagogicalElement
+        inv: aplo-ont:hasNextPedagogicalElement
+        o:
+          type: aplo-ont:PedagogicalElement
+          uri: aplo-r:pedagogicalElement
+      - p: aplo-ont:isAlignmentFor
+        inv: aplo-ont:alignedWith
+        o:
+          type: aplo-ont:LearningObjective
+          uri: aplo-r:learningObjective
+      - p: aplo-ont:isElementOf
+        inv: aplo-ont:hasElement
+        o:
+          type: aplo-ont:PedagogicalFramework
+          uri: aplo-r:pedagogicalFramework
+          connections:
+          - p: aplo-ont:hasElement
+            inv: aplo-ont:isElementOf
+            o:
+              type: aplo-ont:PedagogicalElement
+              uri: aplo-r:pedagogicalElement
+      - p: aplo-ont:isPedagogicalElementSupportedBy
+        inv: aplo-ont:supportsPedagogicalElement
+        o:
+          type: aplo-ont:PedagogicalTechnique
+          uri: aplo-r:pedagogicalTechnique
+          connections:
+          - p: aplo-ont:isPedagogicalTechniqueOf
+            inv: aplo-ont:hasPedagogicalTechnique
+            o:
+              type: aplo-ont:LearningStrategy
+              uri: aplo-r:learningStrategy
+              connections:
+              - p: aplo-ont:hasPedagogicalTechnique
+                inv: aplo-ont:isPedagogicalTechniqueOf
+                o:
+                  type: aplo-ont:PedagogicalTechnique
+                  uri: aplo-r:pedagogicalTechnique
+              - p: aplo-ont:isStrategyAffectedBy
+                inv: aplo-ont:affectsStrategy
+                o:
+                  type: aplo-ont:LearningFeedback
+                  uri: aplo-r:learningFeedback
+          - p: aplo-ont:servesPedagogicalObjective
+            inv: aplo-ont:isPedagogicalObjectiveServedBy
+            o:
+              type: aplo-ont:PedagogicalObjective
+              uri: aplo-r:pedagogicalObjective
+              connections:
+              - p: aplo-ont:isPedagogicalObjectiveServedBy
+                inv: aplo-ont:servesPedagogicalObjective
+                o:
+                  type: aplo-ont:PedagogicalTechnique
+                  uri: aplo-r:pedagogicalTechnique
+          - p: aplo-ont:supportsPedagogicalElement
+            inv: aplo-ont:isPedagogicalElementSupportedBy
+            o:
+              type: aplo-ont:PedagogicalElement
+              uri: aplo-r:pedagogicalElement
+          - p: aplo-ont:targetsLearningObjective
+            inv: aplo-ont:isLearningObjectiveTargetedBy
+            o:
+              type: aplo-ont:LearningObjective
+              uri: aplo-r:learningObjective
+  - p: aplo-ont:developsSkill
+    inv: aplo-ont:isSkillDevelopedBy
+    o:
+      type: aplo-ont:Skill
+      uri: aplo-r:skill
+      connections:
+      - p: aplo-ont:isSkillDevelopedBy
+        inv: aplo-ont:developsSkill
+        o:
+          type: aplo-ont:LearningObjective
+          uri: aplo-r:learningObjective
+      - p: aplo-ont:isSkillObservedBy
+        inv: aplo-ont:onSkill
+        o:
+          type: aplo-ont:AwarenessObservation
+          uri: aplo-r:awarenessObservation
+          connections:
+          - p: aplo-ont:atTime
+            inv: aplo-ont:isTimeOfAwarenessObservation
+            o:
+              type: aplo-ont:TemporalExtent
+              uri: aplo-r:temporalExtent
+              connections:
+              - p: aplo-ont:isResponseTimeOf
+                inv: aplo-ont:hasResponseTime
+                o:
+                  type: aplo-ont:Response
+                  uri: aplo-r:response
+              - p: aplo-ont:isTimeOfAwarenessObservation
+                inv: aplo-ont:atTime
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+          - p: aplo-ont:hasAwarenessLevel
+            inv: aplo-ont:isAwarenessLevelOf
+            o:
+              type: aplo-ont:AwarenessLevel
+              uri: aplo-r:awarenessLevel
+              connections:
+              - p: aplo-ont:isAwarenessLevelOf
+                inv: aplo-ont:hasAwarenessLevel
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+          - p: aplo-ont:isAwarenessObservationAffectedBy
+            inv: aplo-ont:affectsAwarenessObservation
+            o:
+              type: aplo-ont:Response
+              uri: aplo-r:response
+              connections:
+              - p: aplo-ont:affectsAwarenessObservation
+                inv: aplo-ont:isAwarenessObservationAffectedBy
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+              - p: aplo-ont:hasResponseTime
+                inv: aplo-ont:isResponseTimeOf
+                o:
+                  type: aplo-ont:TemporalExtent
+                  uri: aplo-r:temporalExtent
+              - p: aplo-ont:hasSource
+                inv: aplo-ont:isSourceOf
+                o:
+                  type: aplo-ont:Source
+                  uri: aplo-r:source
+              - p: aplo-ont:isFeedbackProvidedBy
+                inv: aplo-ont:provideFeedback
+                o:
+                  type: aplo-ont:EvaluationTechnique
+                  uri: aplo-r:evaluationTechnique
+          - p: aplo-ont:isAwarenessObservationOf
+            inv: aplo-ont:hasAwarenessObservation
+            o:
+              type: aplo-ont:Learner
+              uri: aplo-r:learner
+              connections:
+              - p: aplo-ont:hasAwarenessObservation
+                inv: aplo-ont:isAwarenessObservationOf
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+              - p: aplo-ont:hasGoal
+                inv: aplo-ont:isGoalOf
+                o:
+                  type: aplo-ont:LearnerGoal
+                  uri: aplo-r:learnerGoal
+              - p: aplo-ont:hasLearnerPreference
+                inv: aplo-ont:isLearnerPreferenceOf
+                o:
+                  type: aplo-ont:LearnerPreference
+                  uri: aplo-r:learnerPreference
+              - p: aplo-ont:hasLearningChallenge
+                inv: aplo-ont:isLearningChallengeOf
+                o:
+                  type: aplo-ont:LearningChallenge
+                  uri: aplo-r:learningChallenge
+              - p: aplo-ont:hasSituation
+                inv: aplo-ont:isSituationOf
+                o:
+                  type: aplo-ont:LearningSituation
+                  uri: aplo-r:learningSituation
+          - p: aplo-ont:onSkill
+            inv: aplo-ont:isSkillObservedBy
+            o:
+              type: aplo-ont:Skill
+              uri: aplo-r:skill
+          - p: aplo-ont:onTopic
+            inv: aplo-ont:isTopicObservedBy
+            o:
+              type: edu-ont:Topic
+              uri: aplo-r:topic
+              connections:
+              - p: aplo-ont:isPriorTopicKnowledgeFor
+                inv: aplo-ont:requiresTopicKnowledge
+                o:
+                  type: aplo-ont:LearningSituation
+                  uri: aplo-r:learningSituation
+              - p: aplo-ont:isTopicAwarenessEvaluatedBy
+                inv: aplo-ont:evaluatesTopicAwarenessOf
+                o:
+                  type: aplo-ont:EvaluationAssessmentExercise
+                  uri: aplo-r:evaluationAssessmentExercise
+              - p: aplo-ont:isTopicObservedBy
+                inv: aplo-ont:onTopic
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+              - p: aplo-ont:isTopicRequiredBy
+                inv: aplo-ont:requiresTopic
+                o:
+                  type: aplo-ont:Skill
+                  uri: aplo-r:skill
+      - p: aplo-ont:isTargetSkillOf
+        inv: aplo-ont:targetsSkill
+        o:
+          type: aplo-ont:LearnerGoal
+          uri: aplo-r:learnerGoal
+          connections:
+          - p: aplo-ont:isGoalOf
+            inv: aplo-ont:hasGoal
+            o:
+              type: aplo-ont:Learner
+              uri: aplo-r:learner
+              connections:
+              - p: aplo-ont:hasAwarenessObservation
+                inv: aplo-ont:isAwarenessObservationOf
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+              - p: aplo-ont:hasGoal
+                inv: aplo-ont:isGoalOf
+                o:
+                  type: aplo-ont:LearnerGoal
+                  uri: aplo-r:learnerGoal
+              - p: aplo-ont:hasLearnerPreference
+                inv: aplo-ont:isLearnerPreferenceOf
+                o:
+                  type: aplo-ont:LearnerPreference
+                  uri: aplo-r:learnerPreference
+              - p: aplo-ont:hasLearningChallenge
+                inv: aplo-ont:isLearningChallengeOf
+                o:
+                  type: aplo-ont:LearningChallenge
+                  uri: aplo-r:learningChallenge
+              - p: aplo-ont:hasSituation
+                inv: aplo-ont:isSituationOf
+                o:
+                  type: aplo-ont:LearningSituation
+                  uri: aplo-r:learningSituation
+          - p: aplo-ont:targetsSkill
+            inv: aplo-ont:isTargetSkillOf
+            o:
+              type: aplo-ont:Skill
+              uri: aplo-r:skill
+      - p: aplo-ont:requiresTopic
+        inv: aplo-ont:isTopicRequiredBy
+        o:
+          type: edu-ont:Topic
+          uri: aplo-r:topic
+          connections:
+          - p: aplo-ont:isPriorTopicKnowledgeFor
+            inv: aplo-ont:requiresTopicKnowledge
+            o:
+              type: aplo-ont:LearningSituation
+              uri: aplo-r:learningSituation
+              connections:
+              - p: aplo-ont:isSituationOf
+                inv: aplo-ont:hasSituation
+                o:
+                  type: aplo-ont:Learner
+                  uri: aplo-r:learner
+              - p: aplo-ont:isSituationWorkedOnBy
+                inv: aplo-ont:worksOnSituation
+                o:
+                  type: aplo-ont:LearningObjective
+                  uri: aplo-r:learningObjective
+              - p: aplo-ont:requiresTopicKnowledge
+                inv: aplo-ont:isPriorTopicKnowledgeFor
+                o:
+                  type: edu-ont:Topic
+                  uri: aplo-r:topic
+              - p: aplo-ont:scopes
+                inv: aplo-ont:isPersonaScopeOf
+                o:
+                  type: edu-ont:Persona
+                  uri: aplo-r:persona
+          - p: aplo-ont:isTopicAwarenessEvaluatedBy
+            inv: aplo-ont:evaluatesTopicAwarenessOf
+            o:
+              type: aplo-ont:EvaluationAssessmentExercise
+              uri: aplo-r:evaluationAssessmentExercise
+              connections:
+              - p: aplo-ont:evaluatesTopicAwarenessOf
+                inv: aplo-ont:isTopicAwarenessEvaluatedBy
+                o:
+                  type: edu-ont:Topic
+                  uri: aplo-r:topic
+              - p: aplo-ont:hasWorkloadLevel
+                inv: aplo-ont:isWorkloadLevelOf
+                o:
+                  type: aplo-ont:WorkloadLevel
+                  uri: aplo-r:workloadLevel
+              - p: aplo-ont:usesTechnique
+                inv: aplo-ont:isTechniqueUsedBy
+                o:
+                  type: aplo-ont:EvaluationTechnique
+                  uri: aplo-r:evaluationTechnique
+          - p: aplo-ont:isTopicObservedBy
+            inv: aplo-ont:onTopic
+            o:
+              type: aplo-ont:AwarenessObservation
+              uri: aplo-r:awarenessObservation
+              connections:
+              - p: aplo-ont:atTime
+                inv: aplo-ont:isTimeOfAwarenessObservation
+                o:
+                  type: aplo-ont:TemporalExtent
+                  uri: aplo-r:temporalExtent
+              - p: aplo-ont:hasAwarenessLevel
+                inv: aplo-ont:isAwarenessLevelOf
+                o:
+                  type: aplo-ont:AwarenessLevel
+                  uri: aplo-r:awarenessLevel
+              - p: aplo-ont:isAwarenessObservationAffectedBy
+                inv: aplo-ont:affectsAwarenessObservation
+                o:
+                  type: aplo-ont:Response
+                  uri: aplo-r:response
+              - p: aplo-ont:isAwarenessObservationOf
+                inv: aplo-ont:hasAwarenessObservation
+                o:
+                  type: aplo-ont:Learner
+                  uri: aplo-r:learner
+              - p: aplo-ont:onSkill
+                inv: aplo-ont:isSkillObservedBy
+                o:
+                  type: aplo-ont:Skill
+                  uri: aplo-r:skill
+              - p: aplo-ont:onTopic
+                inv: aplo-ont:isTopicObservedBy
+                o:
+                  type: edu-ont:Topic
+                  uri: aplo-r:topic
+          - p: aplo-ont:isTopicRequiredBy
+            inv: aplo-ont:requiresTopic
+            o:
+              type: aplo-ont:Skill
+              uri: aplo-r:skill
+  - p: aplo-ont:isLearningObjectiveAssessedBy
+    inv: aplo-ont:assessesLearningObjective
+    o:
+      type: aplo-ont:EvaluationTechnique
+      uri: aplo-r:evaluationTechnique
+      connections:
+      - p: aplo-ont:assessesLearningFeedback
+        inv: aplo-ont:isLearningFeedbackAssessedBy
+        o:
+          type: aplo-ont:LearningFeedback
+          uri: aplo-r:learningFeedback
+          connections:
+          - p: aplo-ont:affectsAwarenessObservation
+            inv: aplo-ont:isAwarenessObservationAffectedBy
+            o:
+              type: aplo-ont:AwarenessObservation
+              uri: aplo-r:awarenessObservation
+              connections:
+              - p: aplo-ont:atTime
+                inv: aplo-ont:isTimeOfAwarenessObservation
+                o:
+                  type: aplo-ont:TemporalExtent
+                  uri: aplo-r:temporalExtent
+              - p: aplo-ont:hasAwarenessLevel
+                inv: aplo-ont:isAwarenessLevelOf
+                o:
+                  type: aplo-ont:AwarenessLevel
+                  uri: aplo-r:awarenessLevel
+              - p: aplo-ont:isAwarenessObservationAffectedBy
+                inv: aplo-ont:affectsAwarenessObservation
+                o:
+                  type: aplo-ont:Response
+                  uri: aplo-r:response
+              - p: aplo-ont:isAwarenessObservationOf
+                inv: aplo-ont:hasAwarenessObservation
+                o:
+                  type: aplo-ont:Learner
+                  uri: aplo-r:learner
+              - p: aplo-ont:onSkill
+                inv: aplo-ont:isSkillObservedBy
+                o:
+                  type: aplo-ont:Skill
+                  uri: aplo-r:skill
+              - p: aplo-ont:onTopic
+                inv: aplo-ont:isTopicObservedBy
+                o:
+                  type: edu-ont:Topic
+                  uri: aplo-r:topic
+          - p: aplo-ont:affectsStrategy
+            inv: aplo-ont:isStrategyAffectedBy
+            o:
+              type: aplo-ont:LearningStrategy
+              uri: aplo-r:learningStrategy
+              connections:
+              - p: aplo-ont:hasPedagogicalTechnique
+                inv: aplo-ont:isPedagogicalTechniqueOf
+                o:
+                  type: aplo-ont:PedagogicalTechnique
+                  uri: aplo-r:pedagogicalTechnique
+              - p: aplo-ont:isStrategyAffectedBy
+                inv: aplo-ont:affectsStrategy
+                o:
+                  type: aplo-ont:LearningFeedback
+                  uri: aplo-r:learningFeedback
+          - p: aplo-ont:hasLearningFeedbackType
+            inv: aplo-ont:isLearningFeedbackTypeOf
+            o:
+              type: aplo-ont:LearningFeedbackType
+              uri: aplo-r:learningFeedbackType
+              connections:
+              - p: aplo-ont:isLearningFeedbackTypeOf
+                inv: aplo-ont:hasLearningFeedbackType
+                o:
+                  type: aplo-ont:LearningFeedback
+                  uri: aplo-r:learningFeedback
+          - p: aplo-ont:hasResponseTime
+            inv: aplo-ont:isResponseTimeOf
+            o:
+              type: aplo-ont:TemporalExtent
+              uri: aplo-r:temporalExtent
+              connections:
+              - p: aplo-ont:isResponseTimeOf
+                inv: aplo-ont:hasResponseTime
+                o:
+                  type: aplo-ont:Response
+                  uri: aplo-r:response
+              - p: aplo-ont:isTimeOfAwarenessObservation
+                inv: aplo-ont:atTime
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+          - p: aplo-ont:hasSource
+            inv: aplo-ont:isSourceOf
+            o:
+              type: aplo-ont:Source
+              uri: aplo-r:source
+              connections:
+              - p: aplo-ont:isSourceOf
+                inv: aplo-ont:hasSource
+                o:
+                  type: aplo-ont:Response
+                  uri: aplo-r:response
+          - p: aplo-ont:isFeedbackProvidedBy
+            inv: aplo-ont:provideFeedback
+            o:
+              type: aplo-ont:EvaluationTechnique
+              uri: aplo-r:evaluationTechnique
+          - p: aplo-ont:isLearningFeedbackAssessedBy
+            inv: aplo-ont:assessesLearningFeedback
+            o:
+              type: aplo-ont:EvaluationTechnique
+              uri: aplo-r:evaluationTechnique
+      - p: aplo-ont:assessesLearningObjective
+        inv: aplo-ont:isLearningObjectiveAssessedBy
+        o:
+          type: aplo-ont:LearningObjective
+          uri: aplo-r:learningObjective
+      - p: aplo-ont:hasEvaluationMetric
+        inv: aplo-ont:isEvaluationMetricOf
+        o:
+          type: aplo-ont:EvaluationMetric
+          uri: aplo-r:evaluationMetric
+          connections:
+          - p: aplo-ont:asString
+            o:
+              datatype: rdfs:Literal
+          - p: aplo-ont:isEvaluationMetricOf
+            inv: aplo-ont:hasEvaluationMetric
+            o:
+              type: aplo-ont:EvaluationTechnique
+              uri: aplo-r:evaluationTechnique
+          - p: aplo-ont:isUnitOf
+            inv: aplo-ont:hasUnit
+            o:
+              type: aplo-ont:EvaluationResult
+              uri: aplo-r:evaluationResult
+              connections:
+              - p: aplo-ont:affectsAwarenessObservation
+                inv: aplo-ont:isAwarenessObservationAffectedBy
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+              - p: aplo-ont:hasResponseTime
+                inv: aplo-ont:isResponseTimeOf
+                o:
+                  type: aplo-ont:TemporalExtent
+                  uri: aplo-r:temporalExtent
+              - p: aplo-ont:hasSource
+                inv: aplo-ont:isSourceOf
+                o:
+                  type: aplo-ont:Source
+                  uri: aplo-r:source
+              - p: aplo-ont:hasUnit
+                inv: aplo-ont:isUnitOf
+                o:
+                  type: aplo-ont:EvaluationMetric
+                  uri: aplo-r:evaluationMetric
+              - p: aplo-ont:hasValue
+                o:
+                  datatype: rdfs:Literal
+              - p: aplo-ont:isFeedbackProvidedBy
+                inv: aplo-ont:provideFeedback
+                o:
+                  type: aplo-ont:EvaluationTechnique
+                  uri: aplo-r:evaluationTechnique
+      - p: aplo-ont:hasEvaluationTechniqueType
+        inv: aplo-ont:isEvaluationTechniqueTypeOf
+        o:
+          type: aplo-ont:EvaluationTechniqueType
+          uri: aplo-r:evaluationTechniqueType
+          connections:
+          - p: aplo-ont:isEvaluationTechniqueTypeOf
+            inv: aplo-ont:hasEvaluationTechniqueType
+            o:
+              type: aplo-ont:EvaluationTechnique
+              uri: aplo-r:evaluationTechnique
+      - p: aplo-ont:isTechniqueUsedBy
+        inv: aplo-ont:usesTechnique
+        o:
+          type: aplo-ont:EvaluationAssessmentExercise
+          uri: aplo-r:evaluationAssessmentExercise
+          connections:
+          - p: aplo-ont:evaluatesTopicAwarenessOf
+            inv: aplo-ont:isTopicAwarenessEvaluatedBy
+            o:
+              type: edu-ont:Topic
+              uri: aplo-r:topic
+              connections:
+              - p: aplo-ont:isPriorTopicKnowledgeFor
+                inv: aplo-ont:requiresTopicKnowledge
+                o:
+                  type: aplo-ont:LearningSituation
+                  uri: aplo-r:learningSituation
+              - p: aplo-ont:isTopicAwarenessEvaluatedBy
+                inv: aplo-ont:evaluatesTopicAwarenessOf
+                o:
+                  type: aplo-ont:EvaluationAssessmentExercise
+                  uri: aplo-r:evaluationAssessmentExercise
+              - p: aplo-ont:isTopicObservedBy
+                inv: aplo-ont:onTopic
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+              - p: aplo-ont:isTopicRequiredBy
+                inv: aplo-ont:requiresTopic
+                o:
+                  type: aplo-ont:Skill
+                  uri: aplo-r:skill
+          - p: aplo-ont:hasWorkloadLevel
+            inv: aplo-ont:isWorkloadLevelOf
+            o:
+              type: aplo-ont:WorkloadLevel
+              uri: aplo-r:workloadLevel
+              connections:
+              - p: aplo-ont:isWorkloadLevelOf
+                inv: aplo-ont:hasWorkloadLevel
+                o:
+                  type: aplo-ont:EvaluationAssessmentExercise
+                  uri: aplo-r:evaluationAssessmentExercise
+          - p: aplo-ont:usesTechnique
+            inv: aplo-ont:isTechniqueUsedBy
+            o:
+              type: aplo-ont:EvaluationTechnique
+              uri: aplo-r:evaluationTechnique
+      - p: aplo-ont:provideFeedback
+        inv: aplo-ont:isFeedbackProvidedBy
+        o:
+          type: aplo-ont:Response
+          uri: aplo-r:response
+          connections:
+          - p: aplo-ont:affectsAwarenessObservation
+            inv: aplo-ont:isAwarenessObservationAffectedBy
+            o:
+              type: aplo-ont:AwarenessObservation
+              uri: aplo-r:awarenessObservation
+              connections:
+              - p: aplo-ont:atTime
+                inv: aplo-ont:isTimeOfAwarenessObservation
+                o:
+                  type: aplo-ont:TemporalExtent
+                  uri: aplo-r:temporalExtent
+              - p: aplo-ont:hasAwarenessLevel
+                inv: aplo-ont:isAwarenessLevelOf
+                o:
+                  type: aplo-ont:AwarenessLevel
+                  uri: aplo-r:awarenessLevel
+              - p: aplo-ont:isAwarenessObservationAffectedBy
+                inv: aplo-ont:affectsAwarenessObservation
+                o:
+                  type: aplo-ont:Response
+                  uri: aplo-r:response
+              - p: aplo-ont:isAwarenessObservationOf
+                inv: aplo-ont:hasAwarenessObservation
+                o:
+                  type: aplo-ont:Learner
+                  uri: aplo-r:learner
+              - p: aplo-ont:onSkill
+                inv: aplo-ont:isSkillObservedBy
+                o:
+                  type: aplo-ont:Skill
+                  uri: aplo-r:skill
+              - p: aplo-ont:onTopic
+                inv: aplo-ont:isTopicObservedBy
+                o:
+                  type: edu-ont:Topic
+                  uri: aplo-r:topic
+          - p: aplo-ont:hasResponseTime
+            inv: aplo-ont:isResponseTimeOf
+            o:
+              type: aplo-ont:TemporalExtent
+              uri: aplo-r:temporalExtent
+              connections:
+              - p: aplo-ont:isResponseTimeOf
+                inv: aplo-ont:hasResponseTime
+                o:
+                  type: aplo-ont:Response
+                  uri: aplo-r:response
+              - p: aplo-ont:isTimeOfAwarenessObservation
+                inv: aplo-ont:atTime
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+          - p: aplo-ont:hasSource
+            inv: aplo-ont:isSourceOf
+            o:
+              type: aplo-ont:Source
+              uri: aplo-r:source
+              connections:
+              - p: aplo-ont:isSourceOf
+                inv: aplo-ont:hasSource
+                o:
+                  type: aplo-ont:Response
+                  uri: aplo-r:response
+          - p: aplo-ont:isFeedbackProvidedBy
+            inv: aplo-ont:provideFeedback
+            o:
+              type: aplo-ont:EvaluationTechnique
+              uri: aplo-r:evaluationTechnique
+  - p: aplo-ont:isLearningObjectiveSupportedBy
+    inv: aplo-ont:supportsLearningObjective
+    o:
+      type: edu-ont:Media
+      uri: aplo-r:media
+      connections:
+      - p: aplo-ont:supportsLearningObjective
+        inv: aplo-ont:isLearningObjectiveSupportedBy
+        o:
+          type: aplo-ont:LearningObjective
+          uri: aplo-r:learningObjective
+  - p: aplo-ont:isLearningObjectiveTargetedBy
+    inv: aplo-ont:targetsLearningObjective
+    o:
+      type: aplo-ont:PedagogicalTechnique
+      uri: aplo-r:pedagogicalTechnique
+      connections:
+      - p: aplo-ont:isPedagogicalTechniqueOf
+        inv: aplo-ont:hasPedagogicalTechnique
+        o:
+          type: aplo-ont:LearningStrategy
+          uri: aplo-r:learningStrategy
+          connections:
+          - p: aplo-ont:hasPedagogicalTechnique
+            inv: aplo-ont:isPedagogicalTechniqueOf
+            o:
+              type: aplo-ont:PedagogicalTechnique
+              uri: aplo-r:pedagogicalTechnique
+          - p: aplo-ont:isStrategyAffectedBy
+            inv: aplo-ont:affectsStrategy
+            o:
+              type: aplo-ont:LearningFeedback
+              uri: aplo-r:learningFeedback
+              connections:
+              - p: aplo-ont:affectsAwarenessObservation
+                inv: aplo-ont:isAwarenessObservationAffectedBy
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+              - p: aplo-ont:affectsStrategy
+                inv: aplo-ont:isStrategyAffectedBy
+                o:
+                  type: aplo-ont:LearningStrategy
+                  uri: aplo-r:learningStrategy
+              - p: aplo-ont:hasLearningFeedbackType
+                inv: aplo-ont:isLearningFeedbackTypeOf
+                o:
+                  type: aplo-ont:LearningFeedbackType
+                  uri: aplo-r:learningFeedbackType
+              - p: aplo-ont:hasResponseTime
+                inv: aplo-ont:isResponseTimeOf
+                o:
+                  type: aplo-ont:TemporalExtent
+                  uri: aplo-r:temporalExtent
+              - p: aplo-ont:hasSource
+                inv: aplo-ont:isSourceOf
+                o:
+                  type: aplo-ont:Source
+                  uri: aplo-r:source
+              - p: aplo-ont:isFeedbackProvidedBy
+                inv: aplo-ont:provideFeedback
+                o:
+                  type: aplo-ont:EvaluationTechnique
+                  uri: aplo-r:evaluationTechnique
+              - p: aplo-ont:isLearningFeedbackAssessedBy
+                inv: aplo-ont:assessesLearningFeedback
+                o:
+                  type: aplo-ont:EvaluationTechnique
+                  uri: aplo-r:evaluationTechnique
+      - p: aplo-ont:servesPedagogicalObjective
+        inv: aplo-ont:isPedagogicalObjectiveServedBy
+        o:
+          type: aplo-ont:PedagogicalObjective
+          uri: aplo-r:pedagogicalObjective
+          connections:
+          - p: aplo-ont:isPedagogicalObjectiveServedBy
+            inv: aplo-ont:servesPedagogicalObjective
+            o:
+              type: aplo-ont:PedagogicalTechnique
+              uri: aplo-r:pedagogicalTechnique
+      - p: aplo-ont:supportsPedagogicalElement
+        inv: aplo-ont:isPedagogicalElementSupportedBy
+        o:
+          type: aplo-ont:PedagogicalElement
+          uri: aplo-r:pedagogicalElement
+          connections:
+          - p: aplo-ont:hasNextPedagogicalElement
+            inv: aplo-ont:hasPreviousPedagogicalElement
+            o:
+              type: aplo-ont:PedagogicalElement
+              uri: aplo-r:pedagogicalElement
+          - p: aplo-ont:hasPreviousPedagogicalElement
+            inv: aplo-ont:hasNextPedagogicalElement
+            o:
+              type: aplo-ont:PedagogicalElement
+              uri: aplo-r:pedagogicalElement
+          - p: aplo-ont:isAlignmentFor
+            inv: aplo-ont:alignedWith
+            o:
+              type: aplo-ont:LearningObjective
+              uri: aplo-r:learningObjective
+          - p: aplo-ont:isElementOf
+            inv: aplo-ont:hasElement
+            o:
+              type: aplo-ont:PedagogicalFramework
+              uri: aplo-r:pedagogicalFramework
+              connections:
+              - p: aplo-ont:hasElement
+                inv: aplo-ont:isElementOf
+                o:
+                  type: aplo-ont:PedagogicalElement
+                  uri: aplo-r:pedagogicalElement
+          - p: aplo-ont:isPedagogicalElementSupportedBy
+            inv: aplo-ont:supportsPedagogicalElement
+            o:
+              type: aplo-ont:PedagogicalTechnique
+              uri: aplo-r:pedagogicalTechnique
+      - p: aplo-ont:targetsLearningObjective
+        inv: aplo-ont:isLearningObjectiveTargetedBy
+        o:
+          type: aplo-ont:LearningObjective
+          uri: aplo-r:learningObjective
+  - p: aplo-ont:worksOnSituation
+    inv: aplo-ont:isSituationWorkedOnBy
+    o:
+      type: aplo-ont:LearningSituation
+      uri: aplo-r:learningSituation
+      connections:
+      - p: aplo-ont:isSituationOf
+        inv: aplo-ont:hasSituation
+        o:
+          type: aplo-ont:Learner
+          uri: aplo-r:learner
+          connections:
+          - p: aplo-ont:hasAwarenessObservation
+            inv: aplo-ont:isAwarenessObservationOf
+            o:
+              type: aplo-ont:AwarenessObservation
+              uri: aplo-r:awarenessObservation
+              connections:
+              - p: aplo-ont:atTime
+                inv: aplo-ont:isTimeOfAwarenessObservation
+                o:
+                  type: aplo-ont:TemporalExtent
+                  uri: aplo-r:temporalExtent
+              - p: aplo-ont:hasAwarenessLevel
+                inv: aplo-ont:isAwarenessLevelOf
+                o:
+                  type: aplo-ont:AwarenessLevel
+                  uri: aplo-r:awarenessLevel
+              - p: aplo-ont:isAwarenessObservationAffectedBy
+                inv: aplo-ont:affectsAwarenessObservation
+                o:
+                  type: aplo-ont:Response
+                  uri: aplo-r:response
+              - p: aplo-ont:isAwarenessObservationOf
+                inv: aplo-ont:hasAwarenessObservation
+                o:
+                  type: aplo-ont:Learner
+                  uri: aplo-r:learner
+              - p: aplo-ont:onSkill
+                inv: aplo-ont:isSkillObservedBy
+                o:
+                  type: aplo-ont:Skill
+                  uri: aplo-r:skill
+              - p: aplo-ont:onTopic
+                inv: aplo-ont:isTopicObservedBy
+                o:
+                  type: edu-ont:Topic
+                  uri: aplo-r:topic
+          - p: aplo-ont:hasGoal
+            inv: aplo-ont:isGoalOf
+            o:
+              type: aplo-ont:LearnerGoal
+              uri: aplo-r:learnerGoal
+              connections:
+              - p: aplo-ont:isGoalOf
+                inv: aplo-ont:hasGoal
+                o:
+                  type: aplo-ont:Learner
+                  uri: aplo-r:learner
+              - p: aplo-ont:targetsSkill
+                inv: aplo-ont:isTargetSkillOf
+                o:
+                  type: aplo-ont:Skill
+                  uri: aplo-r:skill
+          - p: aplo-ont:hasLearnerPreference
+            inv: aplo-ont:isLearnerPreferenceOf
+            o:
+              type: aplo-ont:LearnerPreference
+              uri: aplo-r:learnerPreference
+              connections:
+              - p: aplo-ont:isLearnerPreferenceOf
+                inv: aplo-ont:hasLearnerPreference
+                o:
+                  type: aplo-ont:Learner
+                  uri: aplo-r:learner
+          - p: aplo-ont:hasLearningChallenge
+            inv: aplo-ont:isLearningChallengeOf
+            o:
+              type: aplo-ont:LearningChallenge
+              uri: aplo-r:learningChallenge
+              connections:
+              - p: aplo-ont:isLearningChallengeOf
+                inv: aplo-ont:hasLearningChallenge
+                o:
+                  type: aplo-ont:Learner
+                  uri: aplo-r:learner
+          - p: aplo-ont:hasSituation
+            inv: aplo-ont:isSituationOf
+            o:
+              type: aplo-ont:LearningSituation
+              uri: aplo-r:learningSituation
+      - p: aplo-ont:isSituationWorkedOnBy
+        inv: aplo-ont:worksOnSituation
+        o:
+          type: aplo-ont:LearningObjective
+          uri: aplo-r:learningObjective
+      - p: aplo-ont:requiresTopicKnowledge
+        inv: aplo-ont:isPriorTopicKnowledgeFor
+        o:
+          type: edu-ont:Topic
+          uri: aplo-r:topic
+          connections:
+          - p: aplo-ont:isPriorTopicKnowledgeFor
+            inv: aplo-ont:requiresTopicKnowledge
+            o:
+              type: aplo-ont:LearningSituation
+              uri: aplo-r:learningSituation
+          - p: aplo-ont:isTopicAwarenessEvaluatedBy
+            inv: aplo-ont:evaluatesTopicAwarenessOf
+            o:
+              type: aplo-ont:EvaluationAssessmentExercise
+              uri: aplo-r:evaluationAssessmentExercise
+              connections:
+              - p: aplo-ont:evaluatesTopicAwarenessOf
+                inv: aplo-ont:isTopicAwarenessEvaluatedBy
+                o:
+                  type: edu-ont:Topic
+                  uri: aplo-r:topic
+              - p: aplo-ont:hasWorkloadLevel
+                inv: aplo-ont:isWorkloadLevelOf
+                o:
+                  type: aplo-ont:WorkloadLevel
+                  uri: aplo-r:workloadLevel
+              - p: aplo-ont:usesTechnique
+                inv: aplo-ont:isTechniqueUsedBy
+                o:
+                  type: aplo-ont:EvaluationTechnique
+                  uri: aplo-r:evaluationTechnique
+          - p: aplo-ont:isTopicObservedBy
+            inv: aplo-ont:onTopic
+            o:
+              type: aplo-ont:AwarenessObservation
+              uri: aplo-r:awarenessObservation
+              connections:
+              - p: aplo-ont:atTime
+                inv: aplo-ont:isTimeOfAwarenessObservation
+                o:
+                  type: aplo-ont:TemporalExtent
+                  uri: aplo-r:temporalExtent
+              - p: aplo-ont:hasAwarenessLevel
+                inv: aplo-ont:isAwarenessLevelOf
+                o:
+                  type: aplo-ont:AwarenessLevel
+                  uri: aplo-r:awarenessLevel
+              - p: aplo-ont:isAwarenessObservationAffectedBy
+                inv: aplo-ont:affectsAwarenessObservation
+                o:
+                  type: aplo-ont:Response
+                  uri: aplo-r:response
+              - p: aplo-ont:isAwarenessObservationOf
+                inv: aplo-ont:hasAwarenessObservation
+                o:
+                  type: aplo-ont:Learner
+                  uri: aplo-r:learner
+              - p: aplo-ont:onSkill
+                inv: aplo-ont:isSkillObservedBy
+                o:
+                  type: aplo-ont:Skill
+                  uri: aplo-r:skill
+              - p: aplo-ont:onTopic
+                inv: aplo-ont:isTopicObservedBy
+                o:
+                  type: edu-ont:Topic
+                  uri: aplo-r:topic
+          - p: aplo-ont:isTopicRequiredBy
+            inv: aplo-ont:requiresTopic
+            o:
+              type: aplo-ont:Skill
+              uri: aplo-r:skill
+              connections:
+              - p: aplo-ont:isSkillDevelopedBy
+                inv: aplo-ont:developsSkill
+                o:
+                  type: aplo-ont:LearningObjective
+                  uri: aplo-r:learningObjective
+              - p: aplo-ont:isSkillObservedBy
+                inv: aplo-ont:onSkill
+                o:
+                  type: aplo-ont:AwarenessObservation
+                  uri: aplo-r:awarenessObservation
+              - p: aplo-ont:isTargetSkillOf
+                inv: aplo-ont:targetsSkill
+                o:
+                  type: aplo-ont:LearnerGoal
+                  uri: aplo-r:learnerGoal
+              - p: aplo-ont:requiresTopic
+                inv: aplo-ont:isTopicRequiredBy
+                o:
+                  type: edu-ont:Topic
+                  uri: aplo-r:topic
+      - p: aplo-ont:scopes
+        inv: aplo-ont:isPersonaScopeOf
+        o:
+          type: edu-ont:Persona
+          uri: aplo-r:persona
+          connections:
+          - p: aplo-ont:isPersonaScopeOf
+            inv: aplo-ont:scopes
+            o:
+              type: aplo-ont:LearningSituation
+              uri: aplo-r:learningSituation

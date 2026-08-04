@@ -1,0 +1,19 @@
+Ontology-to-YAML structural prototype
+=====================================
+Ontology file: ..\foundry-task\foundry-task\ontology\robo-ont.rdf
+Ontology triples read: 638
+Root classes: Agent, SpatialThing
+Maximum depth: 4
+Output file: evaluation\michael\generated-robot.yaml
+
+Generated unique predicates: 29
+Expected unique predicates: 10
+Matched unique predicates: 10
+Missing expected predicates: 0
+Additional ontology predicates: 19
+
+Missing expected predicates:
+- None
+
+This is predicate-level comparison, not complete YAML equivalence.
+metadata, cvs, varids, val_source, CSV matching, repeated branches, and specialized subclasses are not generated yet.

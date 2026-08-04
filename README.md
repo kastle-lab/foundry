@@ -283,3 +283,43 @@ Known prefixes include:
 - standard entries in the script (`rdf`, `rdfs`, `xsd`, `owl`, `time`, `geo`, `sosa`, etc.)
 
 If an unknown prefix is used, the run fails with an error.
+## Generate a Structural Mapping from an Ontology
+
+The `ontology_to_yaml.py` script generates a draft Foundry `root`
+mapping from an RDF, OWL, or Turtle ontology.
+
+Install the required Python packages:
+
+```bash
+pip install rdflib pyyaml
+```
+
+Basic example:
+
+```bash
+python ontology_to_yaml.py \
+  --ontology path/to/ontology.ttl \
+  --root-class ExampleClass \
+  --output generated-mapping.yaml
+```
+
+For multiple root classes, repeat `--root-class`:
+
+```bash
+python ontology_to_yaml.py \
+  --ontology path/to/ontology.owl \
+  --root-class Agent \
+  --root-class SpatialThing \
+  --ontology-prefix ont \
+  --resource-prefix res \
+  --output generated-mapping.yaml
+```
+
+Optional arguments include:
+
+- `--max-depth` to limit recursive traversal
+- `--compare` to compare predicates with an existing YAML mapping
+- `--report` to save comparison results
+
+This initial version generates the structural `root` section. CSV-dependent
+fields such as `varids` and `val_source` are not generated.
