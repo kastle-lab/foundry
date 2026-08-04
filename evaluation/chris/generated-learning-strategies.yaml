@@ -1,0 +1,64 @@
+root:
+  type: aplo-ont:LearningStrategy
+  uri: aplo-r:learningStrategy
+  connections:
+  - p: aplo-ont:hasPedagogicalTechnique
+    inv: aplo-ont:isPedagogicalTechniqueOf
+    o:
+      type: aplo-ont:PedagogicalTechnique
+      uri: aplo-r:pedagogicalTechnique
+      connections:
+      - p: aplo-ont:isPedagogicalTechniqueOf
+        inv: aplo-ont:hasPedagogicalTechnique
+        o:
+          type: aplo-ont:LearningStrategy
+          uri: aplo-r:learningStrategy
+      - p: aplo-ont:targetsLearningObjective
+        inv: aplo-ont:isLearningObjectiveTargetedBy
+        o:
+          type: aplo-ont:LearningObjective
+          uri: aplo-r:learningObjective
+          connections:
+          - p: aplo-ont:alignedWith
+            inv: aplo-ont:isAlignmentFor
+            o:
+              type: aplo-ont:PedagogicalElement
+              uri: aplo-r:pedagogicalElement
+              connections:
+              - p: aplo-ont:isAlignmentFor
+                inv: aplo-ont:alignedWith
+                o:
+                  type: aplo-ont:LearningObjective
+                  uri: aplo-r:learningObjective
+          - p: aplo-ont:isLearningObjectiveSupportedBy
+            inv: aplo-ont:supportsLearningObjective
+            o:
+              type: edu-ont:Media
+              uri: aplo-r:media
+              connections:
+              - p: aplo-ont:supportsLearningObjective
+                inv: aplo-ont:isLearningObjectiveSupportedBy
+                o:
+                  type: aplo-ont:LearningObjective
+                  uri: aplo-r:learningObjective
+          - p: aplo-ont:isLearningObjectiveTargetedBy
+            inv: aplo-ont:targetsLearningObjective
+            o:
+              type: aplo-ont:PedagogicalTechnique
+              uri: aplo-r:pedagogicalTechnique
+          - p: aplo-ont:worksOnSituation
+            inv: aplo-ont:isSituationWorkedOnBy
+            o:
+              type: aplo-ont:LearningSituation
+              uri: aplo-r:learningSituation
+              connections:
+              - p: aplo-ont:isSituationWorkedOnBy
+                inv: aplo-ont:worksOnSituation
+                o:
+                  type: aplo-ont:LearningObjective
+                  uri: aplo-r:learningObjective
+              - p: aplo-ont:requiresTopicKnowledge
+                inv: aplo-ont:isPriorTopicKnowledgeFor
+                o:
+                  type: edu-ont:Topic
+                  uri: aplo-r:topic

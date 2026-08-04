@@ -1,0 +1,528 @@
+root:
+  type:
+  - robo-ont:Agent
+  - robo-ont:SpatialThing
+  uri: robo-r:agent
+  connections:
+  - p: robo-ont:assumesRole
+    o:
+      type: robo-ont:Role
+      uri: robo-r:role
+      connections:
+      - p: robo-ont:asString
+        o:
+          datatype: xsd:string
+      - p: robo-ont:assimilatesArchetype
+        o:
+          type: robo-ont:Archetype
+          uri: robo-r:archetype
+          connections:
+          - p: robo-ont:requiresCapability
+            o:
+              type: robo-ont:Capability
+              uri: robo-r:capability
+              connections:
+              - p: robo-ont:enabledBySpatialThing
+                o:
+                  type: robo-ont:SpatialThing
+                  uri: robo-r:spatialThing
+              - p: robo-ont:enablesAction
+                o:
+                  type: robo-ont:Action
+                  uri: robo-r:action
+              - p: robo-ont:hasSpec
+                o:
+                  type: robo-ont:Specification
+                  uri: robo-r:specification
+      - p: robo-ont:assimilatesRoleCategory
+        o:
+          type: robo-ont:RoleCategory
+          uri: robo-r:roleCategory
+          connections:
+          - p: robo-ont:hasCategorizationType
+            o:
+              type: robo-ont:CategorizationType
+              uri: robo-r:categorizationType
+      - p: robo-ont:hasTemporalExtent
+        o:
+          type: robo-ont:TemporalExtent
+          uri: robo-r:temporalExtent
+      - p: robo-ont:providesRole
+        o:
+          type: robo-ont:Task
+          uri: robo-r:task
+          connections:
+          - p: robo-ont:dependsOnTask
+            inv: robo-ont:hasNextTask
+            o:
+              type: robo-ont:Task
+              uri: robo-r:task
+          - p: robo-ont:hasNextTask
+            inv: robo-ont:dependsOnTask
+            o:
+              type: robo-ont:Task
+              uri: robo-r:task
+          - p: robo-ont:requiresArchetype
+            o:
+              type: robo-ont:Archetype
+              uri: robo-r:archetype
+              connections:
+              - p: robo-ont:requiresCapability
+                o:
+                  type: robo-ont:Capability
+                  uri: robo-r:capability
+          - p: robo-ont:requiresSpatialThing
+            o:
+              type: robo-ont:SpatialThing
+              uri: robo-r:spatialThing
+              connections:
+              - p: robo-ont:assumesRole
+                o:
+                  type: robo-ont:Role
+                  uri: robo-r:role
+              - p: robo-ont:belongsToCategory
+                o:
+                  type: robo-ont:Category
+                  uri: robo-r:category
+              - p: robo-ont:enablesCapability
+                o:
+                  type: robo-ont:Capability
+                  uri: robo-r:capability
+              - p: robo-ont:z
+                o:
+                  type: robo-ont:Identifier
+                  uri: robo-r:identifier
+              - p: robo-ont:hasName
+                o:
+                  type: robo-ont:Name
+                  uri: robo-r:name
+              - p: robo-ont:hasSerial
+                o:
+                  type: robo-ont:Serial
+                  uri: robo-r:serial
+              - p: robo-ont:hasSpatiotemporalExtent
+                o:
+                  type: robo-ont:SpatiotemporalExtent
+                  uri: robo-r:spatiotemporalExtent
+              - p: robo-ont:hasState
+                o:
+                  type: robo-ont:State
+                  uri: robo-r:state
+  - p: robo-ont:belongsToCategory
+    o:
+      type: robo-ont:Category
+      uri: robo-r:category
+      connections:
+      - p: robo-ont:hasCategorizationType
+        o:
+          type: robo-ont:CategorizationType
+          uri: robo-r:categorizationType
+  - p: robo-ont:enablesCapability
+    o:
+      type: robo-ont:Capability
+      uri: robo-r:capability
+      connections:
+      - p: robo-ont:enabledBySpatialThing
+        o:
+          type: robo-ont:SpatialThing
+          uri: robo-r:spatialThing
+          connections:
+          - p: robo-ont:assumesRole
+            o:
+              type: robo-ont:Role
+              uri: robo-r:role
+              connections:
+              - p: robo-ont:asString
+                o:
+                  datatype: xsd:string
+              - p: robo-ont:assimilatesArchetype
+                o:
+                  type: robo-ont:Archetype
+                  uri: robo-r:archetype
+              - p: robo-ont:assimilatesRoleCategory
+                o:
+                  type: robo-ont:RoleCategory
+                  uri: robo-r:roleCategory
+              - p: robo-ont:hasTemporalExtent
+                o:
+                  type: robo-ont:TemporalExtent
+                  uri: robo-r:temporalExtent
+              - p: robo-ont:providesRole
+                o:
+                  type: robo-ont:Task
+                  uri: robo-r:task
+          - p: robo-ont:belongsToCategory
+            o:
+              type: robo-ont:Category
+              uri: robo-r:category
+              connections:
+              - p: robo-ont:hasCategorizationType
+                o:
+                  type: robo-ont:CategorizationType
+                  uri: robo-r:categorizationType
+          - p: robo-ont:enablesCapability
+            o:
+              type: robo-ont:Capability
+              uri: robo-r:capability
+          - p: robo-ont:hasIdentifier
+            o:
+              type: robo-ont:Identifier
+              uri: robo-r:identifier
+              connections:
+              - p: robo-ont:identifierAsText
+                o:
+                  datatype: xsd:string
+          - p: robo-ont:hasName
+            o:
+              type: robo-ont:Name
+              uri: robo-r:name
+              connections:
+              - p: robo-ont:identifierAsText
+                o:
+                  datatype: xsd:string
+          - p: robo-ont:hasSerial
+            o:
+              type: robo-ont:Serial
+              uri: robo-r:serial
+              connections:
+              - p: robo-ont:identifierAsText
+                o:
+                  datatype: xsd:string
+          - p: robo-ont:hasSpatiotemporalExtent
+            o:
+              type: robo-ont:SpatiotemporalExtent
+              uri: robo-r:spatiotemporalExtent
+          - p: robo-ont:hasState
+            o:
+              type: robo-ont:State
+              uri: robo-r:state
+      - p: robo-ont:enablesAction
+        o:
+          type: robo-ont:Action
+          uri: robo-r:action
+      - p: robo-ont:hasSpec
+        o:
+          type: robo-ont:Specification
+          uri: robo-r:specification
+          connections:
+          - p: robo-ont:hasSpecKind
+            o:
+              type: robo-ont:SpecificationKind
+              uri: robo-r:specificationKind
+          - p: robo-ont:hasThreshold
+            o:
+              type: robo-ont:Threshold
+              uri: robo-r:threshold
+              connections:
+              - p: robo-ont:hasUnit
+                o:
+                  type: robo-ont:Unit
+                  uri: robo-r:unit
+              - p: robo-ont:hasValue
+                o:
+                  datatype: xsd:double
+  - p: robo-ont:fulfillsArchetype
+    o:
+      type: robo-ont:Archetype
+      uri: robo-r:archetype
+      connections:
+      - p: robo-ont:requiresCapability
+        o:
+          type: robo-ont:Capability
+          uri: robo-r:capability
+          connections:
+          - p: robo-ont:enabledBySpatialThing
+            o:
+              type: robo-ont:SpatialThing
+              uri: robo-r:spatialThing
+              connections:
+              - p: robo-ont:assumesRole
+                o:
+                  type: robo-ont:Role
+                  uri: robo-r:role
+              - p: robo-ont:belongsToCategory
+                o:
+                  type: robo-ont:Category
+                  uri: robo-r:category
+              - p: robo-ont:enablesCapability
+                o:
+                  type: robo-ont:Capability
+                  uri: robo-r:capability
+              - p: robo-ont:hasIdentifier
+                o:
+                  type: robo-ont:Identifier
+                  uri: robo-r:identifier
+              - p: robo-ont:hasName
+                o:
+                  type: robo-ont:Name
+                  uri: robo-r:name
+              - p: robo-ont:hasSerial
+                o:
+                  type: robo-ont:Serial
+                  uri: robo-r:serial
+              - p: robo-ont:hasSpatiotemporalExtent
+                o:
+                  type: robo-ont:SpatiotemporalExtent
+                  uri: robo-r:spatiotemporalExtent
+              - p: robo-ont:hasState
+                o:
+                  type: robo-ont:State
+                  uri: robo-r:state
+          - p: robo-ont:enablesAction
+            o:
+              type: robo-ont:Action
+              uri: robo-r:action
+          - p: robo-ont:hasSpec
+            o:
+              type: robo-ont:Specification
+              uri: robo-r:specification
+              connections:
+              - p: robo-ont:hasSpecKind
+                o:
+                  type: robo-ont:SpecificationKind
+                  uri: robo-r:specificationKind
+              - p: robo-ont:hasThreshold
+                o:
+                  type: robo-ont:Threshold
+                  uri: robo-r:threshold
+  - p: robo-ont:hasCapability
+    o:
+      type: robo-ont:Capability
+      uri: robo-r:capability
+      connections:
+      - p: robo-ont:enabledBySpatialThing
+        o:
+          type: robo-ont:SpatialThing
+          uri: robo-r:spatialThing
+          connections:
+          - p: robo-ont:assumesRole
+            o:
+              type: robo-ont:Role
+              uri: robo-r:role
+              connections:
+              - p: robo-ont:asString
+                o:
+                  datatype: xsd:string
+              - p: robo-ont:assimilatesArchetype
+                o:
+                  type: robo-ont:Archetype
+                  uri: robo-r:archetype
+              - p: robo-ont:assimilatesRoleCategory
+                o:
+                  type: robo-ont:RoleCategory
+                  uri: robo-r:roleCategory
+              - p: robo-ont:hasTemporalExtent
+                o:
+                  type: robo-ont:TemporalExtent
+                  uri: robo-r:temporalExtent
+              - p: robo-ont:providesRole
+                o:
+                  type: robo-ont:Task
+                  uri: robo-r:task
+          - p: robo-ont:belongsToCategory
+            o:
+              type: robo-ont:Category
+              uri: robo-r:category
+              connections:
+              - p: robo-ont:hasCategorizationType
+                o:
+                  type: robo-ont:CategorizationType
+                  uri: robo-r:categorizationType
+          - p: robo-ont:enablesCapability
+            o:
+              type: robo-ont:Capability
+              uri: robo-r:capability
+          - p: robo-ont:hasIdentifier
+            o:
+              type: robo-ont:Identifier
+              uri: robo-r:identifier
+              connections:
+              - p: robo-ont:identifierAsText
+                o:
+                  datatype: xsd:string
+          - p: robo-ont:hasName
+            o:
+              type: robo-ont:Name
+              uri: robo-r:name
+              connections:
+              - p: robo-ont:identifierAsText
+                o:
+                  datatype: xsd:string
+          - p: robo-ont:hasSerial
+            o:
+              type: robo-ont:Serial
+              uri: robo-r:serial
+              connections:
+              - p: robo-ont:identifierAsText
+                o:
+                  datatype: xsd:string
+          - p: robo-ont:hasSpatiotemporalExtent
+            o:
+              type: robo-ont:SpatiotemporalExtent
+              uri: robo-r:spatiotemporalExtent
+          - p: robo-ont:hasState
+            o:
+              type: robo-ont:State
+              uri: robo-r:state
+      - p: robo-ont:enablesAction
+        o:
+          type: robo-ont:Action
+          uri: robo-r:action
+      - p: robo-ont:hasSpec
+        o:
+          type: robo-ont:Specification
+          uri: robo-r:specification
+          connections:
+          - p: robo-ont:hasSpecKind
+            o:
+              type: robo-ont:SpecificationKind
+              uri: robo-r:specificationKind
+          - p: robo-ont:hasThreshold
+            o:
+              type: robo-ont:Threshold
+              uri: robo-r:threshold
+              connections:
+              - p: robo-ont:hasUnit
+                o:
+                  type: robo-ont:Unit
+                  uri: robo-r:unit
+              - p: robo-ont:hasValue
+                o:
+                  datatype: xsd:double
+  - p: robo-ont:hasIdentifier
+    o:
+      type: robo-ont:Identifier
+      uri: robo-r:identifier
+      connections:
+      - p: robo-ont:identifierAsText
+        o:
+          datatype: xsd:string
+  - p: robo-ont:hasName
+    o:
+      type: robo-ont:Name
+      uri: robo-r:name
+      connections:
+      - p: robo-ont:identifierAsText
+        o:
+          datatype: xsd:string
+  - p: robo-ont:hasSerial
+    o:
+      type: robo-ont:Serial
+      uri: robo-r:serial
+      connections:
+      - p: robo-ont:identifierAsText
+        o:
+          datatype: xsd:string
+  - p: robo-ont:hasSpatiotemporalExtent
+    o:
+      type: robo-ont:SpatiotemporalExtent
+      uri: robo-r:spatiotemporalExtent
+  - p: robo-ont:hasState
+    o:
+      type: robo-ont:State
+      uri: robo-r:state
+  - p: robo-ont:assumesRole
+    o:
+      type: robo-ont:Role
+      uri: robo-r:role
+      connections:
+      - p: robo-ont:asString
+        o:
+          datatype: xsd:string
+      - p: robo-ont:assimilatesArchetype
+        o:
+          type: robo-ont:Archetype
+          uri: robo-r:archetype
+          connections:
+          - p: robo-ont:requiresCapability
+            o:
+              type: robo-ont:Capability
+              uri: robo-r:capability
+              connections:
+              - p: robo-ont:enabledBySpatialThing
+                o:
+                  type: robo-ont:SpatialThing
+                  uri: robo-r:spatialThing
+              - p: robo-ont:enablesAction
+                o:
+                  type: robo-ont:Action
+                  uri: robo-r:action
+              - p: robo-ont:hasSpec
+                o:
+                  type: robo-ont:Specification
+                  uri: robo-r:specification
+      - p: robo-ont:assimilatesRoleCategory
+        o:
+          type: robo-ont:RoleCategory
+          uri: robo-r:roleCategory
+          connections:
+          - p: robo-ont:hasCategorizationType
+            o:
+              type: robo-ont:CategorizationType
+              uri: robo-r:categorizationType
+      - p: robo-ont:hasTemporalExtent
+        o:
+          type: robo-ont:TemporalExtent
+          uri: robo-r:temporalExtent
+      - p: robo-ont:providesRole
+        o:
+          type: robo-ont:Task
+          uri: robo-r:task
+          connections:
+          - p: robo-ont:dependsOnTask
+            inv: robo-ont:hasNextTask
+            o:
+              type: robo-ont:Task
+              uri: robo-r:task
+          - p: robo-ont:hasNextTask
+            inv: robo-ont:dependsOnTask
+            o:
+              type: robo-ont:Task
+              uri: robo-r:task
+          - p: robo-ont:requiresArchetype
+            o:
+              type: robo-ont:Archetype
+              uri: robo-r:archetype
+              connections:
+              - p: robo-ont:requiresCapability
+                o:
+                  type: robo-ont:Capability
+                  uri: robo-r:capability
+          - p: robo-ont:requiresSpatialThing
+            o:
+              type: robo-ont:SpatialThing
+              uri: robo-r:spatialThing
+  - p: robo-ont:enablesCapability
+    o:
+      type: robo-ont:Capability
+      uri: robo-r:capability
+      connections:
+      - p: robo-ont:enabledBySpatialThing
+        o:
+          type: robo-ont:SpatialThing
+          uri: robo-r:spatialThing
+      - p: robo-ont:enablesAction
+        o:
+          type: robo-ont:Action
+          uri: robo-r:action
+      - p: robo-ont:hasSpec
+        o:
+          type: robo-ont:Specification
+          uri: robo-r:specification
+          connections:
+          - p: robo-ont:hasSpecKind
+            o:
+              type: robo-ont:SpecificationKind
+              uri: robo-r:specificationKind
+          - p: robo-ont:hasThreshold
+            o:
+              type: robo-ont:Threshold
+              uri: robo-r:threshold
+              connections:
+              - p: robo-ont:hasUnit
+                o:
+                  type: robo-ont:Unit
+                  uri: robo-r:unit
+              - p: robo-ont:hasValue
+                o:
+                  datatype: xsd:double

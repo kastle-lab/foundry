@@ -1,0 +1,21 @@
+Ontology-to-YAML structural prototype
+=====================================
+Ontology file: ..\chris-aplo\schema\learning-objective-pattern\learning-objective-pattern.owl
+Ontology triples read: 245
+Root classes: LearningStrategy
+Maximum depth: 4
+Output file: evaluation\chris\generated-learning-strategies.yaml
+
+Generated unique predicates: 11
+Expected unique predicates: 4
+Matched unique predicates: 1
+Missing expected predicates: 3
+Additional ontology predicates: 10
+
+Missing expected predicates:
+- aplo-ont:hasDescription
+- aplo-ont:hasLearningObjective
+- aplo-ont:hasName
+
+This is predicate-level comparison, not complete YAML equivalence.
+metadata, cvs, varids, val_source, CSV matching, repeated branches, and specialized subclasses are not generated yet.
